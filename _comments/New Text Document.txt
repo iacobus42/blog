@@ -1,0 +1,12 @@
+post_id: /2014/03/20/BivariateCorrelations
+date: 2014-03-22 21:01
+return_url: '/2014/03/20/BivariateCorrelations.html'
+name: 'Phil'
+email: ''
+link: ''
+comment: "Hi Jacob,
+
+  I don't believe domain knowledge should need to be used as all domain knowledge is data driven in the first place - the answer is in the data, so lets use it.  I describe a data driven approach to variable selection in my blog post below.
+
+  http://www.anotherdataminingblog.blogspot.co.uk/2013/10/techniques-to-improve-accuracy-of-your_17.html"
+submit: 'Submit Comment'

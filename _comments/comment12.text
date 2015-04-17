@@ -1,0 +1,12 @@
+post_id: /2014/03/14/BayesianSearching
+date: 2014-03-14 17:00
+return_url: '/2014/03/14/BayesianSearching.html'
+name: 'Jacob'
+email: ''
+link: ''
+comment: 'A, 
+
+R treats TRUE/FALSE when used in a numerical context as 1 and 0. Its TRUE/FALSE
+when read into the function and then it is treated as 1/0 when it comes time to
+calculate the product.'
+submit: 'Submit Comment'

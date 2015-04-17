@@ -1,0 +1,12 @@
+post_id: /2015/04/15/PropensityScoreModels
+date: 2015-04-16 22:05
+return_url: 'http://jacobsimmering.com//2015/04/15/PropensityScoreModels.html'
+name: 'Jacob'
+email: ''
+link: 'jacobsimmering.com'
+comment: '@Brendan, I opted for a stronger line than might be strictly justified but I think I still stand beside it. My concern is that PS have the same potential for mis-specification in the model that estimates the PS. Any flaws in regression would carry over to the regression model that estimates the PS. My preference would be for regression as generally the model is clearly specified, something I often find lacking in the applied PS literature. PS matching should at least report info on model performance (e.g., 10-fold CV MSE) but too often you just just "high dimension PS matching."
+
+  @Danilo, I''d never heard of that method or package before. I''m going to check that out. I''d argue that the PS model still binds you to a functional form in estimating of the PS. Hidden functional forms are not better (or worse) than inference that directly assumes that functional form. I''d be the first to admit that rarely are things well behaved and linear --- I often find myself breaking things into categorical levels and not forcing a form on it. But with datasets with > 50,000,000 rows, there is no power penalty so I might be just lucky.
+
+   @jfly, I agree with that statement and believe that a regression model should also come out of the same "simulated experiment." I find Heckman''s selection models to be interesting in this regard and they have (at times) advantages over PS in performance and estimation. However, simple they are not. '
+submit: 'Submit Comment'

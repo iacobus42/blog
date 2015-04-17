@@ -1,0 +1,8 @@
+post_id: /2013/02/21/UsingPythonAndRToTroubleshootConnectivityProblems
+date: 2013-06-09 01:21
+return_url: '/2013/02/21/UsingPythonAndRToTroubleshootConnectivityProblems.html'
+name: 'efrique'
+email: ''
+link: ''
+comment: 'You say things like this: "the second hop has a variance of 17.0 ms". This doesn''t make sense - variance is in units-squared, not original units. Do you mean standard deviation? '
+submit: 'Submit Comment'

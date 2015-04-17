@@ -1,0 +1,12 @@
+post_id: /2013/01/29/RReallyIsSlow
+date: 2013-08-30 02:26
+return_url: '/2013/01/29/RReallyIsSlow.html'
+name: 'Jacob'
+email: ''
+link: 'jacobsimmering.com'
+comment: 'Moran,
+
+  I did use the R compiler library, using cmpfun() before running the functions took the run time down to about 2.4 seconds from 7 or 10.5. It is still slower than C or Python but it is faster. Given the extensive statistical codebase in CRAN, the slower performance is probably worth using R over Python for most analysis. pandas and other projects are improving but nothing comes close to CRAN.
+
+  Jacob'
+submit: 'Submit Comment'

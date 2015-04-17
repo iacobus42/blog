@@ -1,0 +1,10 @@
+post_id: /2015/04/15/PropensityScoreModels
+date: 2015-04-16 14:32
+return_url: 'http://jacobsimmering.com//2015/04/15/PropensityScoreModels.html'
+name: 'DANILO'
+email: ''
+link: 'https://twitter.com/danailon'
+comment: 'Very interesting .. some of the problems you underline about matching are better addressed by MIB techniques (see CEM package http://cran.r-project.org/web/packages/cem/index.html) and lm models however force you to be bound to a functional form.
+
+  My best'
+submit: 'Submit Comment'

@@ -1,0 +1,12 @@
+post_id: /2014/03/20/BivariateCorrelations
+date: 2014-03-22 22:53
+return_url: '/2014/03/20/BivariateCorrelations.html'
+name: 'Jacob'
+email: ''
+link: 'jacobsimmering.com'
+comment: 'Phil,
+
+  I totally agree the answer is in the data. Most people I work with are better off using domain knowledge because they have a lot more of that then they have of statistics. However, I really like methods like cross-validation, AIC and BIC as tools for model selection, including variable selection. I haven''t finished the video on your post or completely digested your code yet but your methods appear to be more complicated than simply bivariate analysis.
+
+  My concern that I''m attempting to get at with this post is that bivariate correlations may not be informative about the model in k dimensions. People in public health (my "domain" background) often use simple correlation coefficients to include/exclude variables from the model. I don''t think that is an effective or harmless way to do variable selection in many cases. '
+submit: 'Submit Comment'

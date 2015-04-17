@@ -1,0 +1,8 @@
+post_id: /2015/04/15/PropensityScoreModels
+date: 2015-04-17 05:22
+return_url: 'http://jacobsimmering.com//2015/04/15/PropensityScoreModels.html'
+name: 'Benjamin Nutter'
+email: ''
+link: ''
+comment: 'Your last sentence is accurate in situations where there is an abundance of data.  Propensity scores, as I have used them, are more like a tool for making the most of limited data (or expensive data).  Particularly when the number of cases may be small enough that you can''t support a large linear model.  In one sense, you can try to account for the variability by adding independent variables to your linear model, or you can account for variability through a propensity match.  Whenever possible, use the linear model. But if there are only a small number of cases or the data collection is expensive, propensity scores let you get almost as much information out of the data.'
+submit: 'Submit Comment'

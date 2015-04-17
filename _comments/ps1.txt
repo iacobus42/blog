@@ -1,0 +1,8 @@
+post_id: /2015/04/15/PropensityScoreModels
+date: 2015-04-16 05:40
+return_url: 'http://jacobsimmering.com//2015/04/15/PropensityScoreModels.html'
+name: 'Brendan Halpin'
+email: ''
+link: ''
+comment: 'I very much like this argument, but your final line is too strong. It misses the fact that PS can be more robust than the linear model if the linear model is mis-specificied.'
+submit: 'Submit Comment'

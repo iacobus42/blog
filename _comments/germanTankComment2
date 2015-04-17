@@ -1,0 +1,13 @@
+post_id: /2014/03/21/GermanTankProblem
+date: 2014-03-24 19:52
+return_url: '/2014/03/21/GermanTankProblem.html'
+name: 'Jacob'
+email: ''
+link: 'jacobsimmering.com'
+comment: 'Alex,
+
+  In the first example I wanted to show drawing with replacement as that is simpler. You take one ball from the urn, note the number, return it and go on. The derivation for the estimate of N is simpler there compared to the case without replacement. In an earlier draft of this post, I discussed it slightly but cut a lot of it.
+
+  Counting and combinatorics are my greatest weakness. I am much more of an applied statistician than someone who spends a lot of time with theory. The pmf is simply the number of ways for an event to occur divided by the number of possible events. For example, in an urn with 10 balls, 3 red and 7 blue, the pmf for a first draw being a red ball is 3 / 10, or the number of red balls divided by the number of balls "at risk" of being drawn. In this case, the m - 1 pick k - 1 gives the number of ways to draw a sample of size k - 1 from a set of size m - 1. The probability that m == N is this value divided by the the number of ways to pick k tanks from a set of N total.
+   '
+submit: 'Submit Comment'

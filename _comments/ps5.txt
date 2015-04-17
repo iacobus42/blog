@@ -1,0 +1,10 @@
+post_id: /2015/04/15/PropensityScoreModels
+date: 2015-04-17 04:59
+return_url: 'http://jacobsimmering.com//2015/04/15/PropensityScoreModels.html'
+name: 'Anon'
+email: ''
+link: ''
+comment: 'Mis-specification in the PS model and mis-specification in the regression model are two different issues. A lot of literature encourages using very imparsimonious propensity models (many variables, interactions) as it is the predicted p, not the parameter estimates  or hypothesis tests, that matters.
+
+  That said, it is also possible to put a lot of effort into testing the specification of the regression model. '
+submit: 'Submit Comment'

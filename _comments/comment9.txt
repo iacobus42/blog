@@ -1,0 +1,16 @@
+post_id: /2013/01/29/RReallyIsSlow
+date: 2013-08-25 05:58
+return_url: '/2013/01/29/RReallyIsSlow.html'
+name: 'Moran'
+email: ''
+link: ''
+comment: 'Thank you for this informative blog, I have 2 questions ,
+
+  Why didn''t you use the R compiler library?
+
+  It is interesting to see how the complied R code is behaving...also , what is the effect of using pqR?
+
+  Thanks,
+  M.
+  '
+submit: 'Submit Comment'

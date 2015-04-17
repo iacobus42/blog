@@ -1,0 +1,13 @@
+post_id: /2014/03/14/BayesianSearching
+date: 2014-03-14 15:46
+return_url: '/2014/03/14/BayesianSearching.html'
+name: 'A'
+email: ''
+link: ''
+comment: "I've been trying to follow along with your code as you go but this has me confused:
+
+  d$searched <- rank(-1 * d$valueOfSearch) <= 100
+  d$newSearchValue <- bayesUpdate(d$searched, d$PrP, d$PrD)
+
+  When I run that I get a vector of and TRUE and FALSE for d$searched, which makes sense I suppose. I'm not clear on how the bayesUpdate function can run with that. Does it read the vector as 1s and 0s?"
+submit: 'Submit Comment'

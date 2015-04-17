@@ -1,0 +1,10 @@
+post_id: /2015/04/15/PropensityScoreModels
+date: 2015-04-16 20:37
+return_url: 'http://jacobsimmering.com//2015/04/15/PropensityScoreModels.html'
+name: 'jfly'
+email: ''
+link: ''
+comment: ' agree with above comments.
+
+  One more thing to add, Ps is more rigorous in methodology sense. With Ps, you r stimulating experiment, not playing with numbers like a reg monkey.'
+submit: 'Submit Comment'

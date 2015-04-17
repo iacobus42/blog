@@ -1,0 +1,8 @@
+post_id: /2013/02/21/UsingPythonAndRToTroubleshootConnectivityProblems
+date: 2013-06-06 14:29
+return_url: '/2013/02/21/UsingPythonAndRToTroubleshootConnectivityProblems.html'
+name: 'Jacob'
+email: ''
+link: 'jacobsimmering.com'
+comment: 'Yes, it looks like there was a mistake in the HTML when I made converted the knitr output to something that would work with R Bloggers. The graphs have been corrected. Thanks to everyone who noticed!'
+submit: 'Submit Comment'

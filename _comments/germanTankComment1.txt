@@ -1,0 +1,16 @@
+post_id: /2014/03/21/GermanTankProblem
+date: 2014-03-24 18:17
+return_url: '/2014/03/21/GermanTankProblem.html'
+name: 'Alex'
+email: '' 
+link: ''
+comment: "I love this explanation of how to think about/visualize the problem!
+
+  I have two questions, though:
+  Since we're picking from the urn without replacement why does the code in the first part specify sampling with replacement?
+
+  I'm not clear on where the pmf of Pr(M=m) comes from. If I read it correctly:
+     The bottom term is the number of possible ways to draw a sample of size k from a set of size N.
+     The top term is the number of possible ways to draw the remaining tanks (k-1) from a set of size m that has already had #m removed (m-1).
+  What I don't understand is why these are the correct terms to define the pmf."
+submit: 'Submit Comment'

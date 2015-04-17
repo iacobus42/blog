@@ -1,0 +1,8 @@
+post_id: /2013/08/29/TVRatingsMyths
+date: 2013-08-30 15:49
+return_url: '/2013/08/29/TVRatingsMyths.html'
+name: 'Robert Young'
+email: ''
+link: ''
+comment: 'I''d be much more interested in data which supports/refutes the following observation:  network TV has gone Back to the Future.  For those old enough, or students of history, know that the TV of the 1950''s was heavily populated with non-scripted shows.  Ted Mack''s Original Amateur Hour being, likely, the most well known.  It sure looks like TV is headed back to those cheap seats.  So, what one needs to know:  what type of show replaces what type of show.  If scripted goes to scripted, that leads to one sort of deduction.  If scripted goes to un-scripted, a different sort of deduction.  If scripted shows tend toward the BBC model of < 10 episodes per "season", and irregular renewals, yet another deduction.  And so on.'
+submit: 'Submit Comment'

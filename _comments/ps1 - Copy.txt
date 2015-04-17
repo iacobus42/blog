@@ -1,0 +1,8 @@
+post_id: /2015/04/15/PropensityScoreModels
+date: 2015-04-16 22:41
+return_url: 'http://jacobsimmering.com//2015/04/15/PropensityScoreModels.html'
+name: 'Tim Churches'
+email: ''
+link: ''
+comment: 'Trying generating your data with a confounder  i.e. a covariate that affects both X and Y. Now repeat your analysis, first treating the confounder as an observed variable, and thus including it in your model, and then as an unobserved variable, and thus excluded from your model. Which approach is then gives a less biased result? The main point of propensity score matching is to try to improve exchangeability between the treated and untreated groups with respect to unobserved confounders and effect modifiers, which by definition can''t be adjusted for in a model.'
+submit: 'Submit Comment'
