@@ -1,0 +1,469 @@
+---
+layout: post
+title: Maximize Your Expectations!
+date: 2013-01-31
+niceDate: Jan 30, 2013
+lede: Observational studies have the same problem as poker, you have to play the cards you are dealt. This can be a problem when you expect people to responder differently to some variable according to some number of unobserved variables. While expectation-maximization probably won't help you in your weekly Texas Hold'em game, it can be an ace up your sleeve in data analysis. 
+rstats: TRUE
+tags: dataMining EM R statistics regression simulation
+id: 20130131
+---
+
+<style type="text/css">
+
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 12px;
+   margin: 8px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+pre {   
+   margin-top: 0;
+   max-width: 95%;
+   border: 1px solid #ccc;
+   white-space: pre-wrap;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code.r, code.cpp {
+   background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * { 
+      background: transparent !important; 
+      color: black !important; 
+      filter:none !important; 
+      -ms-filter: none !important; 
+   }
+
+   body { 
+      font-size:12pt; 
+      max-width:100%; 
+   }
+       
+   a, a:visited { 
+      text-decoration: underline; 
+   }
+
+   hr { 
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote { 
+      padding-right: 1em; 
+      page-break-inside: avoid; 
+   }
+
+   tr, img { 
+      page-break-inside: avoid; 
+   }
+
+   img { 
+      max-width: 100% !important; 
+   }
+
+   @page :left { 
+      margin: 15mm 20mm 15mm 10mm; 
+   }
+     
+   @page :right { 
+      margin: 15mm 10mm 15mm 20mm; 
+   }
+
+   p, h2, h3 { 
+      orphans: 3; widows: 3; 
+   }
+
+   h2, h3 { 
+      page-break-after: avoid; 
+   }
+}
+
+</style>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: rgb(88, 72, 246)
+   }
+
+   pre .number {
+     color: rgb(0, 0, 205);
+   }
+
+   pre .comment {
+     color: rgb(76, 136, 107);
+   }
+
+   pre .keyword {
+     color: rgb(0, 0, 255);
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: rgb(3, 106, 7);
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+
+<!-- MathJax scripts -->
+<script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+</head>
+
+<body>
+<h3>A Problem</h3>
+
+<p>A major problem in secondary data analysis is that you didn&#39;t get to decide what data was collected. Lets say you were interested in how many times a student has read the <a href="http://en.wikipedia.org/wiki/Twilight_(series">Twilight books</a>). Specifically, you want to know how effective the ads for the movies and books are. You come up with a model that says \( n_{T} = f(n_{VB}, \text{ads}, \text{gender}, \epsilon) \) where \( n_{T} \) is the number of times they read Twilight books and \( n_{VB} \) is the number of other vampire books they have read in the past year, \( \text{ads} \) is the number of ads they have seen for the Twilight books or movies and finally gender as Twilight seems to have a differential appeal on the basis of gender. You run off to your <a href="http://www.infochimps.com/marketplace">favorite</a> <a href="http://research.stlouisfed.org/fred2">data</a> <a href="http://archive.ics.uci.edu/ml/">repo</a> and find the prefect data set to answer your question. Someone sat down with a 1,000 high schoolers and asked them about their reading habits as well as how many times they laughed at <a href="http://www.youtube.com/watch?v=5xOSoONDpY4">Twilight trailers</a>. You expect males and females to have difference preferences and therefore respond differently (e.g., different beta coefficients from a linear model) to the ads and the number of other vampire books read in the last year. Instead of creating a model: 
+\[ n_{T} = \beta_0 + \beta_1 n_{VB} + \beta_2 \text{ads} + \beta_3 \text{gender} + \epsilon \]
+you decide to use some interactions, getting at a regression model something like:
+\[ n_{T} = (\beta_0 + \beta_4 \text{gender}) + (\beta_1 + \beta_5 \text{gender}) n_{VB} + (\beta_2 + \beta_6 \text{gender}) \text{ads} + \beta_3 \text{gender} + \epsilon \]
+It is a lovely model, it makes sense and neatly answers your question of interest. You fire up R (or your stats package of choice) only to realize when exploring the data that they didn&#39;t report if the student was male or female. </p>
+
+<p>Now this is a problem. You already have theorize that gender is part of the true data generating process. To ignore it violates the assumptions of most forms of regression &mdash; your error term is now a \( f(\text{gender}, \epsilon) \) and if gender is part of the data generating process, than Y and your error term are not independent. You can do a regression still but the <a href="http://en.wikipedia.org/wiki/Gauss%E2%80%93Markov_theorem">wonderful properties</a> may not hold. You need a way to account for the observed heterogeneity (e.g., gender of the study subjects).</p>
+
+<p>You read up on the subject matter and discover that, on average, girls read more vampire books and that the ads for Twilight were published in venues with a large teenage female demographic (maybe?). Could you use this information to potentially &ldquo;discover&rdquo; the unobserved characteristic using the data you have?</p>
+
+<h3>Expectation–Maximization (EM) Algorithm</h3>
+
+<p>EM is an an <a href="http://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm">iterative</a> <a href="http://en.wikibooks.org/wiki/Data_Mining_Algorithms_In_R/Clustering/Expectation_Maximization_EM">unsupervised clustering method</a>. To grossly oversimplify, EM takes a set of data (\( \bf X \)) and attempts to find the number of clusters represented in \( \bf X \) and finds clusters in the data. It finds clusters by first assigning each point a probability of belonging to a each cluster and then re-estimating the probability distribution for each cluster. This process continues until the error has converged at which time the points are all assigned to a given cluster with some degree of uncertainty. The process repeats for various counts of clusters. The quality of each model is accessed using something like the <a href="http://en.wikipedia.org/wiki/Bayesian_information_criterion">Bayesian information criterion</a> and the model with the number of clusters that maximizes the quality of the model is returned.</p>
+
+<p>We are going to use this with some simulated data to see what risks we run if we ignore the unobserved variables and also how well we can recover that missing information with EM.</p>
+
+<h3>Data Generation and Clustering</h3>
+
+<p>Lets put together a little simulation in R. Sticking to the Twilight example, lets have two observed continuous variables (\( x_1 \) and \( x_2 \)), one unobserved binary variable (\( z \)) and differences between the two groups along the unobserved variable. Let \( x_1 \) be iid and 
+\[ x_1 \sim \begin{cases} N(10, 9) &\mbox{if } z = 0 \\
+N(16, 9) &\mbox{if } z = 1 \end{cases} \]
+For simplicity, let \( x_2 \) also iid and distributed in the same fashion as \( x_1 \). We end up having two populations, each with similar variances but unequal means. Lets generate these data in R:</p>
+
+<pre><code class="r">nSample &lt;- 2000  # this is equal to the size of each class (0.5*total)
+
+# x1a and x2a are features x1 and x2 for z=0 (x11 just seemed a tad much)
+x1a &lt;- rnorm(nSample, 10, 3)
+x2a &lt;- rnorm(nSample, 10, 3)
+# x1b and x2b are features x1 and x2 for z=1
+x1b &lt;- rnorm(nSample, 16, 3)
+x2b &lt;- rnorm(nSample, 16, 3)
+</code></pre>
+
+<p>One of the best things to do when doing any sort of statistics is to look at the data. I prefer <a href="http://en.wikipedia.org/wiki/Kernel_density_estimation">kernel density plots</a> to <a href="http://en.wikipedia.org/wiki/Histograms">histograms</a>, so lets take a look at the density plots.</p>
+
+<pre><code class="r">library(ggplot2)
+# put the data into a dataframe
+clusterData &lt;- data.frame(x1 = c(x1a, x1b), x2 = c(x2a, x2b), class = c(rep(&quot;z = 0&quot;, 
+    nSample), rep(&quot;z = 1&quot;, nSample)))
+clusterData.gg &lt;- ggplot(clusterData, aes(x1 = x1, x2 = x2, type = class))
+
+# plot the combined density in grey and then overlay with colored density
+# for each class
+clusterData.gg + stat_density(aes(x = x1), alpha = 0.5) + geom_density(aes(x = x1, 
+    color = class, fill = class), alpha = 0.5) + theme(legend.position = &quot;none&quot;) + 
+    scale_x_continuous(&quot;Value of x1&quot;) + scale_y_continuous(&quot;Density&quot;)
+</code></pre>
+
+<p><img src="../../../img/2013-01-31/fig1.png" alt="plot of chunk unnamed-chunk-2"/> </p>
+
+<pre><code class="r">
+clusterData.gg + stat_density(aes(x = x2), alpha = 0.5) + geom_density(aes(x = x2, 
+    color = class, fill = class), alpha = 0.5) + theme(legend.position = &quot;none&quot;) + 
+    scale_x_continuous(&quot;Value of x2&quot;) + scale_y_continuous(&quot;Density&quot;)
+</code></pre>
+
+<p><img src="../../../img/2013-01-31/fig2.png" alt="plot of chunk unnamed-chunk-2"/> </p>
+
+<p>The tails are pretty fat but as far as empirical data goes, this is pretty well behaved looking overall. Looking at the composite density, it would be hard to tell that there are actually two different densities represented in the curve. However, our theory/knowledge of the domain says that at least 2 classes exist. </p>
+
+<p>The easiest way I know to do EM in R is to use the <code>mclust</code> package. Lets use that and the data in \( x_1 \) and \( x_2 \) to see what we find:</p>
+
+<pre><code class="r">library(mclust)
+</code></pre>
+
+<pre><code>## Package &#39;mclust&#39; version 4.0
+</code></pre>
+
+<pre><code class="r"># put the data into a matrix just to make using Mclust a bit easier
+clusterMatrix &lt;- matrix(NA, nrow = nSample * 2, ncol = 2)
+clusterMatrix[, 1] &lt;- c(x1a, x1b)
+clusterMatrix[, 2] &lt;- c(x2a, x2b)
+# fits the EM model to the data
+model &lt;- Mclust(clusterMatrix)
+</code></pre>
+
+<p>And that is all it takes. Lets see some of the results</p>
+
+<pre><code class="r">summary(model)
+</code></pre>
+
+<pre><code>## ----------------------------------------------------
+## Gaussian finite mixture model fitted by EM algorithm 
+## ----------------------------------------------------
+## 
+## Mclust EII (spherical, equal volume) model with 2 components:
+## 
+##  log.likelihood    n df    BIC
+##          -22111 4000  6 -44271
+## 
+## Clustering table:
+##    1    2 
+## 2052 1948
+</code></pre>
+
+<p>No surprise there, we expected and we found 2 clusters. Lets take a look at those clusters now. </p>
+
+<pre><code class="r">clusterPlots &lt;- data.frame(x1 = clusterData$x1, x2 = clusterData$x2, cluster = factor(model$classification, 
+    levels = c(1, 2), labels = c(&quot;z = 0&quot;, &quot;z = 1&quot;)), uncertainity = model$uncertainty, 
+    logUncertainity = log(model$uncertainty))
+clusterPlots.gg &lt;- ggplot(clusterPlots)
+clusterPlots.gg + geom_point(aes(x = x1, y = x2, color = cluster))
+</code></pre>
+
+<p><img src="../../../img/2013-01-31/fig3.png" alt="plot of chunk unnamed-chunk-5"/> </p>
+
+<p>The clusters as we defined them were discovered and are centered more or less where we would expect. We can see that they do sit on top of each other a bit in the middle. One of the nice things about EM is it quantifies how uncertain it is in a points class. </p>
+
+<pre><code class="r">clusterPlots.gg + geom_point(aes(x = x1, y = x2, color = logUncertainity))
+</code></pre>
+
+<p><img src="../../../img/2013-01-31/fig4.png" alt="plot of chunk unnamed-chunk-6"/> </p>
+
+<p>That is somewhat helpful, you can see the general trend (points in the middle have higher \( log(\text{uncerrtainty}) \) values and there are more uncertain) but it might be easier to tell if we split it into groups.</p>
+
+<pre><code class="r">clusterPlots$uncertainGroups &lt;- ifelse(clusterPlots$uncertainity &lt;= 0.2, &quot;Highly certain&quot;, 
+    ifelse(clusterPlots$uncertainity &lt;= 0.4, &quot;Moderately certain&quot;, ifelse(clusterPlots$uncertainity &lt;= 
+        0.5, &quot;Weakly certain&quot;, ifelse(clusterPlots$uncertainity &lt;= 0.6, &quot;Weakly uncertain&quot;, 
+        ifelse(clusterPlots$uncertainity &lt;= 0.8, &quot;Moderately uncertain&quot;, &quot;Extremely uncertain&quot;)))))
+clusterPlots.gg &lt;- ggplot(clusterPlots)
+clusterPlots.gg + geom_point(aes(x = x1, y = x2, color = uncertainGroups))
+</code></pre>
+
+<p><img src="../../../img/2013-01-31/fig5.png" alt="plot of chunk unnamed-chunk-7"/> </p>
+
+<h3>Application to Regression</h3>
+
+<p>In the Twilight example, we were using EM to account for some unobserved heterogeneity. Now that we have \( \bf X \), we might as well simulate some regression models and see how this does. To start with, lets define the data generating process as
+\[ y_i = \beta_0 + \beta_{1, z}x_{1, i} + \beta_{2, z}x_{2, i} + \epsilon_i \].
+For simplicity, we are assuming that the error distribution and the intercept are the same between the two groups. It would not be difficult to allow the intercept to vary with group membership by the inclusion of a dummy variable for group but there is enough going on already with group specific values for \( \beta_1 \) and \( \beta_2 \). Lets generate some data for \( y \), \( \epsilon \) and the $\beta$s. </p>
+
+<pre><code class="r"># beta estimates for z = 1 are 0.3
+b1a &lt;- rnorm(nSample, 1, 0.05)  # specific beta1 for z = 0
+b1b &lt;- rnorm(nSample, 1.3, 0.05)  # specific beta1 for z = 1
+b2a &lt;- rnorm(nSample, 1, 0.05)  # specific beta2 for z = 0
+b2b &lt;- rnorm(nSample, 1.3, 0.05)  # specific beta2 for z = 1
+intercept &lt;- rnorm(2 * nSample, 3, 0.075)  # intercept
+e &lt;- rnorm(2 * nSample, 0, 0.05)  # error term
+x1 &lt;- c(x1a, x1b)
+x2 &lt;- c(x1b, x2b)
+beta1 &lt;- c(b1a, b1b)
+beta2 &lt;- c(b2a, b2b)
+
+y &lt;- intercept + beta1 * x1 + beta2 * x2 + e
+</code></pre>
+
+<p>And lets test the regression model where we pretend like the \( \beta \) values are constant \( \forall \) \( z \). </p>
+
+<pre><code class="r">naiveModel &lt;- lm(y ~ x1 + x2)
+summary(naiveModel)
+</code></pre>
+
+<pre><code>## 
+## Call:
+## lm(formula = y ~ x1 + x2)
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -14.00  -2.30   0.28   2.45   8.96 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  -6.0538     0.3286   -18.4   &lt;2e-16 ***
+## x1            1.8902     0.0124   152.8   &lt;2e-16 ***
+## x2            1.1386     0.0175    65.1   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1 
+## 
+## Residual standard error: 3.32 on 3997 degrees of freedom
+## Multiple R-squared: 0.873,   Adjusted R-squared: 0.873 
+## F-statistic: 1.37e+04 on 2 and 3997 DF,  p-value: &lt;2e-16
+</code></pre>
+
+<pre><code class="r">AIC(naiveModel)
+</code></pre>
+
+<pre><code>## [1] 20947
+</code></pre>
+
+<p>If we just look at the adjusted R-squared (0.873) and p values (\( <2e-16 \), that is, like, really small /sarcasm), it looks like the model did a very good job of explaining the system in question. However, we know what the true data generating process was and all three parameters are significant off. We aren&#39;t really getting an accurate idea of what the underlying data generating process is with this model. What happens when we include the EM predicted cluster membership? </p>
+
+<pre><code class="r">classOne &lt;- model$classification == 1  # actually z = 1
+emModel &lt;- lm(y ~ x1 + I(x1 * classOne) + x2 + I(x2 * classOne))
+summary(emModel)
+</code></pre>
+
+<pre><code>## 
+## Call:
+## lm(formula = y ~ x1 + I(x1 * classOne) + x2 + I(x2 * classOne))
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -13.454  -0.969   0.038   1.037   8.851 
+## 
+## Coefficients:
+##                  Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)        3.5267     0.2780   12.69  &lt; 2e-16 ***
+## x1                 1.3463     0.0152   88.80  &lt; 2e-16 ***
+## I(x1 * classOne)  -0.1186     0.0190   -6.25  4.6e-10 ***
+## x2                 1.1887     0.0153   77.92  &lt; 2e-16 ***
+## I(x2 * classOne)  -0.3328     0.0158  -21.04  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1 
+## 
+## Residual standard error: 2.35 on 3995 degrees of freedom
+## Multiple R-squared: 0.936,   Adjusted R-squared: 0.936 
+## F-statistic: 1.47e+04 on 4 and 3995 DF,  p-value: &lt;2e-16
+</code></pre>
+
+<pre><code class="r">AIC(emModel)
+</code></pre>
+
+<pre><code>## [1] 18190
+</code></pre>
+
+<pre><code class="r">anova(naiveModel, emModel)
+</code></pre>
+
+<pre><code>## Analysis of Variance Table
+## 
+## Model 1: y ~ x1 + x2
+## Model 2: y ~ x1 + I(x1 * classOne) + x2 + I(x2 * classOne)
+##   Res.Df   RSS Df Sum of Sq    F Pr(&gt;F)    
+## 1   3997 43958                             
+## 2   3995 22043  2     21915 1986 &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+</code></pre>
+
+<p>A significant improvement the simple sweep-it-under-the-rug model but still not all that amazing. We are still not reliably uncovering the true underlying data generating process as well as we might hope. We have to be able to do better than that.</p>
+
+<p>So far we haven&#39;t taken advantage of the uncertainty measurements from the EM process. We can use these as weights in the regression to reduce the importance of points which we are most uncertain about group membership. We could also find a way to fix it in with the regression model, perhaps instead of using classZero use something like \( Pr(z_i = 0) \), but this is the simplest way to bring them into play. </p>
+
+<pre><code class="r">uncertainity &lt;- model$uncertainty
+
+emModelWeighted &lt;- lm(y ~ x1 + I(x1 * classOne) + x2 + I(x2 * classOne), weights = -log(uncertainity))
+summary(emModelWeighted)
+</code></pre>
+
+<pre><code>## 
+## Call:
+## lm(formula = y ~ x1 + I(x1 * classOne) + x2 + I(x2 * classOne), 
+##     weights = -log(uncertainity))
+## 
+## Weighted Residuals:
+##    Min     1Q Median     3Q    Max 
+## -22.40  -1.73  -0.14   1.59  12.36 
+## 
+## Coefficients:
+##                  Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)        3.2240     0.2003    16.1   &lt;2e-16 ***
+## x1                 1.3107     0.0110   119.7   &lt;2e-16 ***
+## I(x1 * classOne)  -0.2015     0.0146   -13.8   &lt;2e-16 ***
+## x2                 1.2655     0.0110   115.3   &lt;2e-16 ***
+## I(x2 * classOne)  -0.3304     0.0118   -28.1   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1 
+## 
+## Residual standard error: 3.62 on 3995 degrees of freedom
+## Multiple R-squared: 0.975,   Adjusted R-squared: 0.975 
+## F-statistic: 3.96e+04 on 4 and 3995 DF,  p-value: &lt;2e-16
+</code></pre>
+
+<pre><code class="r">AIC(emModelWeighted)
+</code></pre>
+
+<pre><code>## [1] 16438
+</code></pre>
+
+<p>If we weight the estimates by how certain we are in the group membership, we get a much better result. Here I used \( -log(uncertainity) \) but say similar results using \( 1 - uncertainity \) and \( 1/(1 - uncertainity)^{-1} \). I decided on using \( -log(uncertainity) \) as I really wanted to weight towards points that I was more certain in against points that I wasn&#39;t. The \( -log \) transformation gives me this desired effect. Using <code>rlm()</code> from <code>MASS</code> gives similar results to any of these weight transformations.</p>
+
+<p>Finally, if just for curiosity&#39;s sake, I wanted to see what was &ldquo;the best I could do.&rdquo; Since we had assigned the clusters, I wanted to repeat the above regression but using the true assignments instead of the predicted ones. </p>
+
+<pre><code class="r">trueClassOne &lt;- trueClass == 1  # z = 1
+cheatingModel &lt;- lm(y ~ x1 + I(x1 * trueClassOne) + x2 + I(x2 * trueClassOne))
+summary(cheatingModel)
+</code></pre>
+
+<pre><code>## 
+## Call:
+## lm(formula = y ~ x1 + I(x1 * trueClassOne) + x2 + I(x2 * trueClassOne))
+## 
+## Residuals:
+##    Min     1Q Median     3Q    Max 
+## -4.258 -0.724 -0.017  0.723  3.945 
+## 
+## Coefficients:
+##                      Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)           2.92893    0.11932    24.6   &lt;2e-16 ***
+## x1                    0.99962    0.00769   129.9   &lt;2e-16 ***
+## I(x1 * trueClassOne)  0.30467    0.00908    33.6   &lt;2e-16 ***
+## x2                    1.00149    0.00686   145.9   &lt;2e-16 ***
+## I(x2 * trueClassOne)  0.29878    0.00751    39.8   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1 
+## 
+## Residual standard error: 1.09 on 3995 degrees of freedom
+## Multiple R-squared: 0.986,   Adjusted R-squared: 0.986 
+## F-statistic: 7.24e+04 on 4 and 3995 DF,  p-value: &lt;2e-16
+</code></pre>
+
+<pre><code class="r">AIC(cheatingModel)
+</code></pre>
+
+<pre><code>## [1] 12015
+</code></pre>
+
+<p>Looking at this model and the performance of the EM enhanced models, I have to say while having actual group membership would be best, even in this simple 2D case we readily uncovered the clusters and improved out regression quality drastically compared to ignoring the unobserved variable. What I show here can be readily extended to highly dimensional cases and may detect true clusters more easily. If we had another several \( x \) variables, we may have been more able to more accurately distinguish between \( z = 0 \) and \( z = 1 \). But that simulation is for another post.  </p>
+
+
+
+
+<br>
+<br>

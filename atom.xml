@@ -1,0 +1,26 @@
+---
+layout: null
+---
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+ 
+ <title>Jacob Simmering</title>
+ <link href="http://jacobsimmering.com/atom.xml" rel="self"/>
+ <link href="http://jacobsimmering.com"/>
+ <updated>{{ site.time | date_to_xmlschema }}</updated>
+ <id>jacobsimmering.com</id>
+ <author>
+   <name>Jacob Simmering</name>
+ </author>
+ 
+ {% for post in site.posts %}
+ <entry>
+   <title>{{ post.title }}</title>
+   <link href="http://jacobsimmering.com{{ post.url }}"/>
+   <updated>{{ post.date | date_to_xmlschema }}</updated>
+   <id>http://jacobsimmering.com{{ post.id }}</id>
+   <content type="html">{{ post.lede | xml_escape }}</content>
+ </entry>
+ {% endfor %}
+ 
+</feed>

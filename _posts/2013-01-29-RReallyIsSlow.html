@@ -1,0 +1,44 @@
+---
+layout: post
+title: How slow is R really?
+date: 2013-01-29
+niceDate: Jan 29, 2013
+lede: Everyone complains about how slow R is, especially without vectorized code. I was working on a Project Euler problem and decided to see how slow R really is. I wrote a program to calculate the 10,001st prime using C, Python and R. The results were not pretty (at least for R). Will the byte code compiler save the day?
+tags: ProjectEuler R python C performance
+rstats: TRUE
+---
+
+<p>One thing you always hear about R is how <a href = "http://stackoverflow.com/questions/2908822/speed-up-the-loop-operation-in-r">slow</a> <a href="http://www.r-bloggers.com/speeding-up-r-computations/">it</a> <a href="http://www.r-statistics.com/2012/04/speed-up-your-r-code-using-a-just-in-time-jit-compiler/">is</a>, especially when the code is not well vectorized or includes loops. But R is an interpreted language and its strong suit really isn't speed but rather the comparative advantage is the 4,284 packages on <a href="http://cran.r-project.org/web/packages/">CRAN</a>. We accept the slower speed for the time saved from not having to re-invent the wheel every time we want to do something new. </p>
+
+<p>But that doesn't mean that it isn't worth sometimes wondering how slow R is relative to other languages, especially with new tools like <a href="http://pandas.pydata.org/">pandas</a> in Python. I happened to be working on a Project Euler problem with the objective of calculating the first 10,001 prime numbers. I decided to see how R performed relative to my other primary languages of Python and C. I also wanted to see how R's performance changed when I used <code>apply()</code> and also the new(ish) compiler package.</p>
+
+<p>I took the same basic approach to each language by writing a two functions. The first determines whether a number is prime or a composite by trial division with the set {2, 3, 5, ..., round(sqrt(number))} and stopped when a trial division had mod 0 or when we had exhausted all possible divisors. The second function considered the odd numbers and counted the number of prime values. It returned the value of the supplied index. The code for <a href="https://github.com/iacobus42/ProjectEuler/blob/master/euler7.c">C</a>, <a href="https://github.com/iacobus42/ProjectEuler/blob/master/euler7.py">Python</a> and R (<a href="https://github.com/iacobus42/ProjectEuler/blob/master/euler7apply.R">with</a> and <a href = "https://github.com/iacobus42/ProjectEuler/blob/master/euler7.R">without</a> use of <code>sapply()</code>).</p>
+
+<p>The results were most as expected:</p> 
+
+<pre><code>time ./euler7
+real    0m0.026s
+user    0m0.024s
+sys     0m0.000s
+
+time python euler7.py 
+real    0m0.409s
+user    0m0.396s
+sys     0m0.004s
+
+time R CMD BATCH euler7.R
+real    0m7.058s
+user    0m6.268s
+sys     0m0.028s
+</code></pre>
+<br>
+<p>C, the only compiled language, was really fast. It was nearly 16 times faster than Python and over 270 times faster than R. Relative to R, Python was a 17-fold performance increase. To paraphrase the SAT, C is to Python as Python is to R (for this problem).</p>
+
+<p>What about using <code>sapply()</code> and taking advantage of Rs functional programming? That was dreadful. Relative to the loops, using functional programing and <code>sapply()</code> actually increased runtime to 10.470 seconds.</p> 
+
+R isn't looking so hot here. The CRAN packages are still worth it but the relative performance advantages of Python and increasing analytical support but it is still largely confined to <a href="http://seanjtaylor.com/post/39573264781/the-statistics-software-signal">programmers who do stats</a>. There is some hope with the <a href="http://homepage.stat.uiowa.edu/~luke/R/compiler/compiler.pdf">byte code compiler</a> for R. We get a massive performance increase in this case when we compile the functions before using them. Using <code>cmpfun()</code> reduced runtime to 2.408 seconds from the previous 7.058 and 10.470 seconds, respectively. While still much slower than Python or C, this represents a significant performance increase for R relative to its state just a year ago. 
+
+Maybe we won't have to depend on the incredible packages on CRAN for our comparative advantage forever. 
+
+<br>
+<br>

@@ -1,0 +1,444 @@
+---
+layout: post
+title: The Problem with Propensity Scores
+date: 2015-04-15
+niceDate: Apr 15, 2015
+lede: Propensity scores are increasingly in vogue as a way to adjust for differences between populations in estimating treatment effects. Some view propensity scores as an almost mythical way of dealing with confounding. However, they are limited to adjustment for the observables, just like standard regression. So it raises the question "how do propensity scores compare as an estimator relative to linear regression?" The answer is short --- "not well."  
+tags: statistics r regression propensity-scores 
+rstats: TRUE
+id: 20151504
+---
+<style>
+pre { 
+   margin-top: 0;
+   max-width: 95%;
+   border: 1px solid #ccc;
+   white-space: pre-wrap;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code.r, code.cpp {
+   background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * { 
+      background: transparent !important; 
+      color: black !important; 
+      filter:none !important; 
+      -ms-filter: none !important; 
+   }
+
+   body { 
+      font-size:12pt; 
+      max-width:100%; 
+   }
+       
+   a, a:visited { 
+      text-decoration: underline; 
+   }
+
+   hr { 
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote { 
+      padding-right: 1em; 
+      page-break-inside: avoid; 
+   }
+
+   tr, img { 
+      page-break-inside: avoid; 
+   }
+
+   img { 
+      max-width: 100% !important; 
+   }
+
+   @page :left { 
+      margin: 15mm 20mm 15mm 10mm; 
+   }
+     
+   @page :right { 
+      margin: 15mm 10mm 15mm 20mm; 
+   }
+
+   p, h2, h3 { 
+      orphans: 3; widows: 3; 
+   }
+
+   h2, h3 { 
+      page-break-after: avoid; 
+   }
+}
+
+</style>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: rgb(88, 72, 246)
+   }
+
+   pre .number {
+     color: rgb(0, 0, 205);
+   }
+
+   pre .comment {
+     color: rgb(76, 136, 107);
+   }
+
+   pre .keyword {
+     color: rgb(0, 0, 255);
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: rgb(3, 106, 7);
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+
+<!-- MathJax scripts -->
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+</head>
+
+<body>
+
+<h1>Are Propensity Scores Useful?</h1>
+
+<p>Effect estimation for treatments using observation data isn't always straight forward. For example, it is very common that patients who are treated with a certain medication or procedure are healthier than those who are not treated. Those who aren't treated may not be treated due to a higher risk of treatment in their condition or a reduced expected value of treatment (e.g., a statin does not make sense as a new treatment for a patient who is 100 years old due to other causes of mortality). If you simply compared the the difference between the means of some response among the treated and untreated populations, the estimate would be confounded by the differences between the populations.</p>
+<p>One method of dealing with this problem was to match on the observed characteristics thought to be relevant. Studies would find a control patient that matched the case patient on age, gender and a number of other factors. The problem with this approach is that it is expensive and impractical to match on anything more than a few factors due to the <a href="http://en.wikipedia.org/wiki/Curse_of_dimensionality">curse of dimensionality</a>. To avoid “throwing away” unmatched cases, the number of required candidate controls to be sampled increases exponentially with the number of matched factors.</p>
+<p>Propensity scores are a possible alternative to this problem. Instead of matching points either directly or using a nearest-neighbor method in <span class="math">\(k\)</span> dimensions, a model can be constructed to express the propensity (e.g., probability) to be treated as a function of the observed variables. Then, matching can be done in 1 dimension with this propensity. By reducing the <span class="math">\(k\)</span> dimensional problem to 1 dimension, it is possible to increase the number of matched factors and to also use the collected data more effectively. The analysis of the matched groups can be done using a relatively simple method, such as a t test.</p>
+<p>While much can be said for reducing the complexity of the analysis to a simple bivariate test and for the potential relatively greater ease for modeling treatment choice as opposed to outcome, the value of a PS-adjusted bivariate test isn't clear to me. To explore the question in more detail, I did a few simulations in R to model how well a OLS estimator and a PS adjusted estimator did at estimating a treatment effect under the “best case” conditions.</p>
+
+<h2>Simulation</h2>
+<p>Propensity scores are typically estimated by fitting a binomial GLM with treatment status (0 or 1) as the outcome and all other covariates being predictors. Lets generate a set of 10 predictors, treatment and the response variable. The predictors will all be iid normal and will be the only non-white noise elements in the determination of treatment status. I selected an error term with a standard deviation of 5 empirically.</p>
+<pre class="r"><code>set.seed(222)
+X &lt;- replicate(10, rnorm(1000))
+error &lt;- rnorm(1000, 0, 5)
+probTreatment &lt;- exp(cbind(1, X) %*% rep(1, 11) + error) / 
+  (1 + exp(cbind(1, X) %*% rep(1, 11) + error))</code></pre>
+<p>The vector <code>probTreatment</code> gives us <span class="math">\(\text{Pr}(T = 1 | x_1, x_2, \ldots,  x_{10})\)</span>. If we use <code>rbinom</code>, we can randomly assign treatment based on the different probabilities:</p>
+<pre class="r"><code>t &lt;- rbinom(1000, 1, probTreatment)</code></pre>
+<p>Now that we have treatment assigned, lets generate the response variable.</p>
+<pre class="r"><code>y &lt;- 1 + X %*% rep(1, 10) + t + rnorm(1000, 0, 5)</code></pre>
+<p>As mentioned above, simply comparing the values of <span class="math">\(y\)</span> for the treated and untreated groups won't produce the right estimates.</p>
+<pre class="r"><code>t.test(y[t == 1], y[t == 0])</code></pre>
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  y[t == 1] and y[t == 0]
+## t = 8.8739, df = 945.607, p-value &lt; 2.2e-16
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  2.421779 3.797091
+## sample estimates:
+##  mean of x  mean of y 
+##  2.7115980 -0.3978372</code></pre>
+<p>The estimated treatment effect is 3.11, a 310.94% over estimate of the true value of 1.</p>
+<p>However, if we estimate a propensity score model and match on the nearest unmatched control subject to the difference between the matches being less than 20% of the standard deviation of the pooled propensity scores, we get a better estimate. First, the model:</p>
+<pre class="r"><code>ps &lt;- glm(t ~ X, family = binomial())
+psValues &lt;- predict(ps)
+psTreated &lt;- psValues[t == 1]
+psUntreated &lt;- psValues[t == 0]</code></pre>
+<p>The next step is to match subject to the 20% of the standard deviation limit:</p>
+<pre class="r"><code># find matches, require be within 20% of a sd of the untransformed pooled ps
+matches &lt;- matrix(NA, ncol = 3, nrow = NROW(y[t == 1]))
+limit &lt;- 0.2 * sd(predict(ps))
+for (i in 1:NROW(y[t == 1])) {
+  x &lt;- psTreated[i]
+  distance &lt;- (x - psUntreated)^2
+  if (min(distance) &lt;= limit) {
+    nn &lt;- which.min(distance)
+    psUntreated[nn] &lt;- .Machine$integer.max
+    matches[i, ] &lt;- c(i, nn, distance[nn]) 
+  } else {
+    matches[i, ] &lt;- c(i, NA, NA)
+  }
+}</code></pre>
+<p>The loop takes each treated patient and searches for an unmatched untreated patient near the treated patient's propensity score and within the constraint. Once matched, the propensity score for the untreated patient is set to <code>.Machine$integer.max</code> to prevent further matches to the same patient (setting the value to <code>NA</code> introduces problems and <code>.Machine$integer.max</code> is safe enough). If there is no possible match subject to the constraints, the treated patient is matched to <code>NA</code> to reflect this fact.</p>
+<p>Using the matches, we can construct two new vectors, <code>yTreatedMatched</code> and <code>yUntreatedMatched</code> for the t test. Based on propensity score theory, and true in this simulation, conditional on the observed characteristics the assignment to treatment or not treatment is random. As a result, these two groups are similar to what you might see in an RCT (in theory) and so the differences should be an unbiased and accurate estimate of the treatment effect.</p>
+<pre class="r"><code># throw out the unmatched patients
+matches &lt;- matches[!is.na(matches[, 2]), ]
+yTreatedMatched &lt;- y[t == 1][matches[, 1]]
+yUntreatedMatched &lt;- y[t == 0][matches[, 2]]
+t.test(yTreatedMatched, yUntreatedMatched)</code></pre>
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  yTreatedMatched and yUntreatedMatched
+## t = 2.2593, df = 654.727, p-value = 0.0242
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  0.1224774 1.7492684
+## sample estimates:
+## mean of x mean of y 
+## 1.4946742 0.5588013</code></pre>
+<p>And, as expected, the propensity score matched estimator produces an accurate measure of the treatment effect, 0.94, compared to a true effect of 1. The result is also statistically significantly different from zero.</p>
+<p>However, it required that we threw away data. We “collected” data on 565 treated patients but with 435 untreated patients, we were only able to match 330, or 58.41%.</p>
+<p>Additionally, had we instead used a OLS regression model, we could have produced similar estimates.</p>
+<pre class="r"><code>model &lt;- lm(y ~ X + t)
+model</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = y ~ X + t)
+## 
+## Coefficients:
+## (Intercept)           X1           X2           X3           X4  
+##      1.1242       1.0259       0.7914       0.5494       0.8666  
+##          X5           X6           X7           X8           X9  
+##      0.7482       0.8879       0.9435       1.2965       0.8275  
+##         X10            t  
+##      0.6487       0.7250</code></pre>
+<p>Moreover, the 95% CI produced using the OLS method is smaller ranging from 0.05 to 1.4 compared to the t test CI ranging from 0.12 to 1.75.</p>
+<p>The next step is to see how this holds up for a variety of values of <span class="math">\(n\)</span> and sampling ratios (e.g., 2 controls per case vs 1 control per case). To this end, the function <code>psSim</code> simulates a propensity score adjusted model. It works by constructing a large population of size <code>n</code> with <code>k</code> covariates and 1 treatment variable. From this large population, <code>sampleN</code> cases are selected at random and <code>ratio * sampleN</code> controls are selected. (I'm using case and control here to mean treated vs untreated, not in the strict sense of a [case-control study] (<a href="http://en.wikipedia.org/wiki/Case-control_study">http://en.wikipedia.org/wiki/Case-control_study</a>)).</p>
+<p>From these sampled cases and controls, a propensity score model is estimated and the treatment effect is estimated using the matched populations. The function returns a 2 element vector, the first element is the estimated treatment effect and the second is the p value from the t test.</p>
+<p>The function is below:</p>
+<pre class="r"><code>psSim &lt;- function(n, k, sampleN, ratio) {
+  # generate k covariates
+  X &lt;- replicate(k, rnorm(n))
+  # some errors to the propensity score model
+  pErr &lt;- rnorm(n, 0, 5)  
+  pt &lt;- exp(1 + X %*% rep(1, k) + pErr)/(1 + exp(1 + X %*% rep(1, k) + pErr))
+  # assign treatment status
+  t &lt;- rbinom(n, 1, pt)
+  
+  # generate response
+  yErr &lt;- rnorm(n, 0, 5)
+  y &lt;- 1 + X %*% rep(1, k) + t + yErr
+  
+  # put into big data frame
+  data &lt;- data.frame(y = y, t = t)
+  data &lt;- cbind(data, X)
+  names(data) &lt;- c(&quot;y&quot;, &quot;t&quot;, paste(rep(&quot;x&quot;, k), 1:k, sep = ''))
+  
+  # generate sample from population
+  treatedSample &lt;- data[t == 1, ][sample(1:nrow(data[t == 1, ]), sampleN), ]
+  untreatedSample &lt;- data[t == 0, ][sample(1:nrow(data[t == 0, ]), 
+                                           ratio * sampleN), ]
+  
+  # estimate propensity scores using all k X predictors
+  sample &lt;- rbind(treatedSample, untreatedSample)
+  ps &lt;- glm(t ~ ., data = sample[-1], 
+            family = binomial())
+  # find untransformed fitted values
+  psTreated &lt;- predict(ps)[sample$t == 1]
+  psUntreated &lt;- predict(ps)[sample$t == 0]
+  
+  # find matches, require be within 20% of a sd of the untransformed pooled ps
+  matches &lt;- matrix(NA, ncol = 3, nrow = nrow(treatedSample))
+  limit &lt;- 0.2 * sd(predict(ps))
+  for (i in 1:nrow(treatedSample)) {
+    x &lt;- psTreated[i]
+    distance &lt;- (x - psUntreated)^2
+    if (min(distance) &lt;= limit) {
+      nn &lt;- which.min(distance)
+      psUntreated[nn] &lt;- .Machine$integer.max
+      matches[i, ] &lt;- c(i, nn, distance[nn]) 
+    } else {
+      matches[i, ] &lt;- c(i, NA, NA)
+    }
+  }
+  
+  # do analysis
+  treatedY &lt;- treatedSample[, 1]
+  untreatedY &lt;- untreatedSample[, 1]
+  matches &lt;- matches[!is.na(matches[, 2]), ]
+  matchedTreatedY &lt;- treatedY[matches[, 1]]
+  matchedUntreatedY &lt;- untreatedY[matches[, 2]]
+  test &lt;- t.test(matchedTreatedY, matchedUntreatedY)
+  results &lt;- c(mean(matchedTreatedY - matchedUntreatedY), test$p.value)
+  results
+}</code></pre>
+<p>I also wrote a second function that generates the population and sample in the same way but instead of using propensity score matching, the treatment effect is estimated directly with OLS. This function is called <code>lmSim</code>:</p>
+<pre class="r"><code>lmSim &lt;- function(n, k, sampleN, ratio) {
+  # generate k covariates
+  X &lt;- replicate(k, rnorm(n))
+  # some errors to the propensity score model
+  pErr &lt;- rnorm(n, 0, 5)  
+  pt &lt;- exp(1 + X %*% rep(1, k) + pErr)/(1 + exp(1 + X %*% rep(1, k) + pErr))
+  # assign treatment status
+  t &lt;- rbinom(n, 1, pt)
+  
+  # generate response
+  yErr &lt;- rnorm(n, 0, 5)
+  y &lt;- 1 + X %*% rep(1, k) + t + yErr
+  
+  # put into big data frame
+  data &lt;- data.frame(y = y, t = t)
+  data &lt;- cbind(data, X)
+  names(data) &lt;- c(&quot;y&quot;, &quot;t&quot;, paste(rep(&quot;x&quot;, k), 1:k, sep = ''))
+  
+  # generate sample from population
+  treatedSample &lt;- data[t == 1, ][sample(1:nrow(data[t == 1, ]), sampleN), ]
+  untreatedSample &lt;- data[t == 0, ][sample(1:nrow(data[t == 0, ]), 
+                                           ratio * sampleN), ]
+  sampleData &lt;- rbind(treatedSample, untreatedSample)
+  # fit OLS model
+  model &lt;- summary(lm(y ~ ., data = sampleData))
+  results &lt;- c(model$coefficients[2, 1], model$coefficients[2, 4])
+  results
+}</code></pre>
+<p>Using these two functions, I ran each estimator through 100 iterations for sample sizes of 50 to 1000 cases and control sets of 1 to 2 times larger. If you are running this at home, it takes a while. There is a second post that discusses running this code in parallel (using the <code>parallel</code> package) that also does a little optimization to the code as well (both technically and statistically) that is worth checking out, otherwise, be ready to wait a while (about 45-60 minutes on 3.0 GHz CPU).</p>
+<pre class="r"><code>psMean &lt;- matrix(NA, nrow = 100 * 3, ncol = 100)
+psP &lt;- matrix(NA, nrow = 100 * 3, ncol = 100)
+lsMean &lt;- matrix(NA, nrow = 100 * 3, ncol = 100)
+lsP &lt;- matrix(NA, nrow = 100 * 3, ncol = 100)
+i &lt;- 1
+for (n in seq(50, 1000, length.out = 100)) {
+  for (ratio in c(1, 1.5, 2)) {
+    psResults &lt;- replicate(100, psSim(10000, 10, n, ratio))
+    lmResults &lt;- replicate(100, lmSim(10000, 10, n, ratio))
+    psMean[i, ] &lt;- psResults[1, ]
+    psP[i, ] &lt;- psResults[2, ]
+    lsMean[i, ] &lt;- lmResults[1, ]
+    lsP[i, ] &lt;- lmResults[2, ]
+    i &lt;- i + 1
+  }
+}</code></pre>
+<p>And some data munging to get it into a reasonable format for plotting:</p>
+<pre class="r"><code>results &lt;- data.frame(estimatedEffect = c(as.numeric(psMean), 
+                                          as.numeric(lsMean)))
+results$ratio &lt;- c(1, 1.5, 2)
+results$n &lt;- rep(seq(50, 1000, length.out = 100), each = 3)
+results$method &lt;- rep(c(&quot;PS&quot;, &quot;LS&quot;), each = 300 * 100)
+results$p &lt;- c(as.numeric(psP), as.numeric(lsP))
+results$sig &lt;- results$p &lt;= 0.05</code></pre>
+
+<h2>Results</h2>
+<p>If we plot the estimate against the sample size (of cases):</p>
+<pre class="r"><code>ggplot(results, aes(x = n, y = estimatedEffect)) + 
+  geom_point(aes(color = method), alpha = 0.25) + 
+  facet_grid(ratio ~ method) + 
+  scale_y_continuous(&quot;Estimated Treatment Effect&quot;) + 
+  geom_hline(aes(yintercept = 1))</code></pre>
+<p><img src="../../../img/2015-04-15/fig1.png" width = 100%></p>
+
+<p>The code produces a 3x3 grid of plots, the left plots are the estimates from OLS and the right from from the propensity score matched t test. The rows are the different ratios of control to case sampling (1, 1.5 and 2).</p>
+<p>It is clear that both estimators produce reasonably unbiased estimates of the true treatment effect of 1. Furthermore, both appear to converge to the true value of 1 as the sample size goes to infinity.</p>
+<p>However, it looks like the range of the estimates of the OLS estimator may be smaller at a given value of <span class="math">\(n\)</span> than the propensity scores estimator. To this end, I calculate the mean squared error (MSE) of the estimate from the true value of 1 for both methods at each sample size.</p>
+<pre class="r"><code># from dplyr
+mse &lt;- summarise(group_by(results, method, n, ratio), mean((estimatedEffect - 1)^2))
+names(mse) &lt;- c(&quot;method&quot;, &quot;n&quot;, &quot;ratio&quot;, &quot;mse&quot;)</code></pre>
+<p>When plotted</p>
+<pre class="r"><code>ggplot(mse, aes(x = n, y = mse, color = method)) + 
+  geom_point() + 
+  facet_grid(ratio ~ .) + 
+  scale_x_continuous(&quot;N&quot;) + 
+  scale_y_continuous(&quot;MSE&quot;)</code></pre>
+<p><img src="../../../img/2015-04-15/fig2.png" width = 100%></p>
+
+<p>and especially when just a smoother is shown, not the actual points,</p>
+<pre class="r"><code>ggplot(mse, aes(x = n, y = mse, color = method)) + 
+  geom_smooth(method = &quot;loess&quot;) + 
+  facet_grid(ratio ~ .) + 
+  scale_x_continuous(&quot;N&quot;) + 
+  scale_y_continuous(&quot;MSE&quot;)</code></pre>
+<p><img src="../../../img/2015-04-15/fig3.png" width = 100%></p>
+
+<p>it becomes clear that the MSE of a regression method is smaller than the typical MSE of the propensity score method for a fixed <span class="math">\(k\)</span> as <span class="math">\(n\)</span> varies.</p>
+<p>Unsurprisingly, the higher MSE also shows up in the power testing. If we look at the p values of the tests:</p>
+<pre class="r"><code>ggplot(results, aes(x = n, y = p)) + 
+  geom_point(aes(color = method), alpha = 0.25) + facet_grid(ratio ~ method) + 
+  scale_y_continuous(&quot;Observed p value&quot;) + geom_hline(aes(yintercept = 0.05))</code></pre>
+<p><img src="../../../img/2015-04-15/fig4.png" width = 100%></p>
+
+<p>As we known that the true treatment effect is 1, we should expect fairly small p values. Both modeling frameworks appear to give similar results, although, as with the estimate and MSE plots above, relative differences in performance emerge as we consider the power curve.</p>
+<p>If we formalize this with an estimated power curve:</p>
+<pre class="r"><code>power &lt;- group_by(results, method, n, ratio) %&gt;%
+  summarize(power = mean(sig))
+ggplot(power, aes(x = n, y = power, color = method)) + 
+  geom_point(aes(color = method)) + facet_grid(ratio ~ method) + 
+  geom_smooth(method = &quot;loess&quot;) + 
+  scale_x_continuous(&quot;N&quot;) + 
+  scale_y_continuous(&quot;Power&quot;)</code></pre>
+<p><img src="../../../img/2015-04-15/fig5.png" width = 100%></p>
+
+<p>And again but with just the LOESS fit and no points:</p>
+<pre class="r"><code>ggplot(power, aes(x = n, y = power * 100, color = method)) + 
+  facet_grid(ratio ~ .) + 
+  geom_smooth(method = &quot;loess&quot;) + 
+  scale_x_continuous(&quot;N&quot;) + 
+  scale_y_continuous(&quot;Power&quot;)</code></pre>
+<p><img src="../../../img/2015-04-15/fig6.png" width = 100%></p>  
+
+<p>We see a relative difference between the two methods with the difference most pronounced at larger values of <span class="math">\(k\)</span>.</p>
+<pre class="r"><code>ps &lt;- power[power$method == &quot;PS&quot;, ]
+ols &lt;- power[power$method == &quot;LS&quot;, ]
+diffPower &lt;- data.frame(ratio = ps$ratio,
+                        diff = ols$power - ps$power,
+                        n = ps$n)
+diffPower$`ls more powerful` &lt;- diffPower$diff &gt; 0
+ggplot(diffPower, aes(x = n, y = diff * 100)) +
+  geom_point(aes(color = `ls more powerful`)) + 
+  facet_grid(ratio ~ .) + 
+  geom_smooth(method = &quot;loess&quot;, alpha = 0) + 
+  scale_x_continuous(&quot;N&quot;) + 
+  scale_y_continuous(&quot;Percentage Point Difference in Power&quot;)</code></pre>
+<p><img src="../../../img/2015-04-15/fig7.png" width = 100%></p>  
+
+<p>In general, propensity score methods for a fixed <span class="math">\(k\)</span> over a varied <span class="math">\(n\)</span> are less powerful than regression methods at the same values of <span class="math">\(n\)</span> and <span class="math">\(k\)</span>. These differences become small as <span class="math">\(n\)</span> gets very large, say 500-750, but for smaller values of <span class="math">\(n\)</span> they can make a meaningful difference. A 10-20 percentage point increase in power by simply using regression over matching is hard to turn down.</p>
+<p>The benefits of using linear models becomes more clear when you look at the variance of <span class="math">\(k\)</span>. With the same <span class="math">\(n\)</span> and increasing <span class="math">\(k\)</span>, the linear model becomes increasingly powerful, to as much as 10 percentage points greater power. When the ratio of cases and controls gets larger, the power of regression is clearer than ever.</p>
+<p>There are other problems with propensity scores. The propensity score models in this simulation were “perfect.” Conditional on all the observed variables, treatment choice was random, as our model was an exact restatement of the data generating process. This is unlikely to be the case in reality. Few, if any, papers evaluate the performance of their propensity score model. Many don't even provide information about what went into the model and the model selection, much less a cross-validation MSE.</p>
+<p>They offer no improvement over regression in terms of unobserved heterogeneity. The scores are functionally identical to doing a regression and so suffer from all the relevant drawbacks.</p>
+<p>Finally, propensity scores are computationally more expensive than regression. The file <code>k.csv</code> contains timings from a run of the propensity score and regression methods on similar data sets with a fixed value of <span class="math">\(n = 1000\)</span> and <span class="math">\(k\)</span> ranging from 10 to 100 done with 100 replications at each combination on my Linode VPS.</p>
+<pre class="r"><code>timings &lt;- read.csv(&quot;/home/jacob/documents/blog/ps/k.csv&quot;)
+# have to remove an outlier
+timings &lt;- timings[timings$k != 10, ]
+timings$method &lt;- ifelse(timings$m == 0, &quot;LS&quot;, &quot;PS&quot;)
+ggplot(timings, aes(x = k, y = t, color = method)) + geom_point() + 
+  geom_smooth(method = &quot;loess&quot;) + 
+  scale_x_continuous(&quot;K&quot;) + 
+  scale_y_continuous(&quot;Time / s&quot;)</code></pre>
+
+<p><img src="../../../img/2015-04-15/fig8.png" width = 100%></p>  
+<p>Regression is nearly always much faster than propensity score matching. More importantly, as <span class="math">\(k\)</span> increases with a fixed <span class="math">\(n\)</span>, the cost of regression increases approximately linearly. The non-linear increase with respect to <span class="math">\(k\)</span> is scary — a model that estimates and then matches on 500 predictors could take hours to fix, or seconds with a OLS model.</p>
+<p>This makes sense, <code>lm()</code> and similar functions hand off the computation to highly optimized numerical linear algebra routines. No matching function, even if written in a lower level language like C or C++ via <code>Rcpp</code> will be nowhere near as fast and optimized as LINPACK/LAPACK/BLAS.</p>
+<p>It would be hard, if not impossible, to match a propensity score method as fast as regression for two reasons. The propensity score method already <em>does</em> the regression in order to estimate the propensity scores. The matching then adds on an additional and greater cost.</p>
+
+<h2>Take-away</h2>
+<p>This added cost is just that, added cost. It doesn't provide a power benefit (if anything, it comes with a power penalty), computational benefit or reduction in complexity. While PS methods work, there is practically no circumstance in which they work and regression methods do not work at least as well.</p>
+
+</body>

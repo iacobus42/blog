@@ -1,0 +1,61 @@
+---
+layout: default
+---
+ <style>
+  textarea { width: 100%;}
+  .the-fix { padding-right: 10px; }
+ </style>
+
+<h3 class = "content">{{page.niceDate}}</h3>
+{{ content }}
+
+Tags: <i class="icon-tags"></i> {% for tag in page.tags %} <a href="/tags/{{ tag }}" title="View posts tagged with &quot;{{ tag }}&quot;"><u>{{ tag }}</u></a>  {% if forloop.last != true %} {% endif %} {% endfor %}
+<br>
+<br>
+<div id="comments">
+    {% case page.comment_count %}
+        {% when 0 %}
+            <h2>No Comments! Be the first!</h2>
+        {% when 1 %}
+            <h2>1 Comment</h2>
+        {% else %}
+            <h2>{{page.comment_count}} Comments</h2>
+    {% endcase %}
+    <hr/>
+    {% for c in page.comments %}
+        <div class="comment {% cycle 'odd', 'even' %}">
+            <p class="comment_header">
+                {% if c.link and c.link != '' %}
+                    <h3>At {{c.date}} <a href="{{c.link}}">{{c.name}}</a> writes:</h3>
+                {% else %}
+                    <h3>At {{c.date}} {{c.name}} writes:</h3>
+                {% endif %}
+            </p>
+            <p>
+                {{c.comment | newline_to_br}}
+            </p>
+        </div>
+        <hr/>
+    {% endfor %}
+    <h3>Post a comment</h3>
+    <p style="font-style: italic">
+        All comments are held for moderation.
+    </p>
+    <form id="commentform" method="POST" action="http://jacobsimmering.com/commentsubmit.php">
+        <input type="hidden" name="post_id" value="{{page.id}}" />
+        <input type="hidden" name="return_url" value="http://jacobsimmering.com/{{page.url}}" />
+            <!-- Label and text input -->
+            <label for="regularInput">Name: (required)</label>
+            <input type="text" size="25" name="name"/> 
+            <label for="regularInput">Email: (required, not published)</label>
+            <input type="text" size="25" name="email" /> 
+            <label for="regularInput">Website: (optional)</label>
+            <input type="text" size="25" name="link" /> 
+            <label class="the-fix" for="regularTextarea">Comment: </label>
+            <textarea id="regularTextarea" name="comment" rows="10" cols="60"></textarea> 
+            <input type="submit" name="submit" value="Submit Comment" />
+    </form>
+</div>
+<br>
+<br>
+<br>

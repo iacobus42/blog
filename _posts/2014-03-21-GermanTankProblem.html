@@ -1,0 +1,438 @@
+---
+layout: post
+title: Frequentist German Tank Problem
+date: 2014-03-21
+niceDate: Mar 21, 2014
+lede: When you go to war, it can be useful to know how many tanks the other side has. However, they often refuse to tell you. Worse even, they will often vastly inflate production numbers. They are at war, after all. If only there was a way to convert that pesky sequential serial number to an estimate of the total number of tanks...
+tags: statistics ggplot r frequentist 
+rstats: TRUE
+id: 20141403
+---
+<style>
+pre {	
+   margin-top: 0;
+   max-width: 95%;
+   border: 1px solid #ccc;
+   white-space: pre-wrap;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code.r, code.cpp {
+   background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * { 
+      background: transparent !important; 
+      color: black !important; 
+      filter:none !important; 
+      -ms-filter: none !important; 
+   }
+
+   body { 
+      font-size:12pt; 
+      max-width:100%; 
+   }
+       
+   a, a:visited { 
+      text-decoration: underline; 
+   }
+
+   hr { 
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote { 
+      padding-right: 1em; 
+      page-break-inside: avoid; 
+   }
+
+   tr, img { 
+      page-break-inside: avoid; 
+   }
+
+   img { 
+      max-width: 100% !important; 
+   }
+
+   @page :left { 
+      margin: 15mm 20mm 15mm 10mm; 
+   }
+     
+   @page :right { 
+      margin: 15mm 10mm 15mm 20mm; 
+   }
+
+   p, h2, h3 { 
+      orphans: 3; widows: 3; 
+   }
+
+   h2, h3 { 
+      page-break-after: avoid; 
+   }
+}
+
+</style>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: rgb(88, 72, 246)
+   }
+
+   pre .number {
+     color: rgb(0, 0, 205);
+   }
+
+   pre .comment {
+     color: rgb(76, 136, 107);
+   }
+
+   pre .keyword {
+     color: rgb(0, 0, 255);
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: rgb(3, 106, 7);
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+
+<!-- MathJax scripts -->
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+</head>
+
+<body>
+<h1>The German Tank Problem: The Frequentist Way</h1>
+
+<p>Many things are given a serial number and often that serial number, logically, 
+starts at 1 and for each new unit is increased by 1. For example, German tanks
+in World War II had several parts with serial numbers. By collecting the value
+of these numbers, Allied statisticians could produce estimates of the total 
+number of tanks produced by the Germans in a given time period. </p>
+
+<p>The idea behind this was that the serial numbers encountered in the field were 
+samples from a discrete uniform distribution starting at 1 and terminating at 
+some unknown value \( N \), where \( N \) is the true number of tanks built. The problem
+then became to use the information from the tanks captured/destroyed in 
+battle estimate the value of \( N \). </p>
+
+<p>If you had an urn with numbered balls from 1 to \( N \) and draw \( k \) balls with 
+replacement, the maximum value observed in the sample is a reasonable estimator 
+of \( N \). </p>
+
+<p>A simple simulation shows that this is the case:</p>
+
+<pre><code class="r">sampleUrn &lt;- function(k, N = 10000, r = 100) {
+    urn &lt;- 1:N
+    sampleMax &lt;- replicate(r, max(sample(urn, k, replace = TRUE)))
+    sampleMax
+}
+k &lt;- seq(1, 10000, length.out = 100)
+sampleMax &lt;- lapply(k, sampleUrn)
+sampleMax &lt;- data.frame(maxValue = do.call(c, sampleMax), k = rep(k, each = 100))
+ggplot(sampleMax, aes(x = k, y = maxValue)) + geom_point() + scale_y_continuous(&quot;Sample Maximum&quot;)
+</code></pre>
+
+<p><img src="../../../img/2014-03-21/fig1.png"></p>
+
+<p>Indeed, as suggested by the plot, the estimator is consistent for \( N \) (a formal 
+treatment is in Example 5.1.1 in Hogg, McKean and Craig 6th edition). </p>
+
+<p>However, try as they might, the Allies couldn&#39;t capture enough tanks to make
+an appeal to asymptotic theory. For fairly small sample sizes, the bias of this 
+estimator is significant. This makes sense as the sample max cannot exceed but 
+only equal the maximum value of the support and the probability of a draw 
+containing a given sample depends on the size of the draw (and the sample 
+space). </p>
+
+<p>Furthermore, they weren&#39;t sampling the tanks with replacement. The information
+about the tank&#39;s serial numbers came when the tank was captured or disabled in
+combat. Therefore, once observed, the tank can never be observed again. This
+complicates the pmf for \( M \) somewhat but provides more accurate estimation
+of \( N \) for a fixed sample than without accepting this complexity. </p>
+
+<p>Nevertheless, it is possible to produce an estimator of \( N \), \( \hat{N} \), that 
+is unbiased for small sample sizes and captures the fact that the sampling is 
+done without replacement. To start simply, </p>
+
+<p>\[ 
+E(M; k) = \sum_{m = 0}^{N} m \text{Pr}(m)
+ \]</p>
+
+<p>or the expectation of the sample maximum, \( M \), given a draw of size \( k \) is 
+simply the sum of the products of \( m \) times \( \text{Pr}(m) \) where 
+\( m \in {1, 2, \ldots} \). </p>
+
+<p>If we recognize that we have observed \( k \) tanks, it is not possible for \( N < k \) 
+because we are sampling without replacement and have seen \( k \) unique tanks, we 
+can split the summation into two parts</p>
+
+<p>\[  
+E(M; k) = \sum_{m = 0}^{k-1} m \text{Pr}(m) + \sum_{m = k}^{N} m \text{Pr}(m)
+ \]</p>
+
+<p>and since \( Pr(N = m) = 0 \) for \( m < k \), this reduces to</p>
+
+<p>\[  
+E(M; k) = \sum_{m = k}^{N} m \text{Pr}(m)
+ \]</p>
+
+<p>Since the sampling is without replacement, the pmf of \( M \) is the number of
+ways to select \( k-1 \) tanks from a set of \( m-1 \) tanks divided by the total number
+of ways to select \( k \) tanks from the total set of \( N \) tanks. After questions 
+involving cards, this is my least favorite part of math stats, but it appears 
+that this expression is given by</p>
+
+<p>\[ 
+\text{Pr}(M = m) = \frac{\binom{m-1}{k-1}}{\binom{N}{k}}
+ \]</p>
+
+<p>If we plug this in the the summation above for \( \text{Pr}(m) \), we get</p>
+
+<p>\[  
+E(M; k) = \sum_{m = k}^{N} m \frac{\binom{m-1}{k-1}}{\binom{N}{k}}
+ \]</p>
+
+<p>Which, even without expansion of the binomial coefficients into a factorial 
+form, is ugly. And so expansion is exactly what we do</p>
+
+<p>\[ 
+E(M; k) = \sum_{m = k}^{N} m \frac{\frac{(m-1)!}{(k-1)!((m-1)-(k-1))!}}{\binom{N}{k}}
+ \]</p>
+
+<p>And if we bring the \( m \) into the expression</p>
+
+<p>\[ 
+E(M; k) = \sum_{m = k}^{N} \frac{\frac{m!}{(k-1)!((m - k))!}}{\binom{N}{k}}
+ \]</p>
+
+<p>The expansion would be much nicer now if we could somehow put it back into a 
+binomial coefficient. It is close to \( \binom{m}{k} \) but we would need a 
+\( \frac{1}{k} \) multiplier. If we multiply the top and bottom of the expansion
+by \( k \), we do not change the value but we arrive at</p>
+
+<p>\[ 
+E(M; k) = \sum_{m = k}^{N} \frac{\frac{km!}{k(k-1)!((m - k))!}}{\binom{N}{k}}
+ \]</p>
+
+<p>which can be rewritten as </p>
+
+<p>\[ 
+E(M; k) = \sum_{m = k}^{N} \frac{k\binom{m}{k}}{\binom{N}{k}}
+ \]</p>
+
+<p>As far as the summation is concerned, \( k \) and \( \binom{N}{k} \) are constants
+and we can rewrite the expression as </p>
+
+<p>\[ 
+E(M; k) = \frac{k}{\binom{N}{k}} \sum_{m = k}^{N} \binom{m}{k}
+ \]</p>
+
+<p>At first glance, this doesn&#39;t look like much of an improvement. However, 
+now we just have the summation of a single binomial coefficient without any 
+multiplication inside the summation.</p>
+
+<p>Recall from earlier, the pmf of \( M \) is </p>
+
+<p>\[ 
+\text{Pr}(M = m) = \frac{\binom{m-1}{k-1}}{\binom{N}{k}}
+ \]</p>
+
+<p>By the definition of a pmf, the sum of \( \text{Pr}(M = m) \) over the support 
+of \( m \) is 1. As the values of \( \text{Pr}(m) \) are 0 for \( m < k \), this becomes</p>
+
+<p>\[  
+1 = \sum_{m = k}^{n} \frac{\binom{m-1}{k-1}}{\binom{N}{k}}
+ \]</p>
+
+<p>The \( \frac{1}{\binom{N}{k}} \) can be pulled out giving</p>
+
+<p>\[ 
+1 = \frac{1}{\binom{N}{k}} \sum_{m = k}^{n} \binom{m-1}{k-1}
+ \]</p>
+
+<p>In order for this expression to be true, </p>
+
+<p>\[ 
+\binom{N}{k} = \sum_{m = k}^{N} \binom{m-1}{k-1}
+ \]</p>
+
+<p>Now returning to the expectation, we see something similar with 
+\( \sum_{m = k}^{N} \binom{m}{k} \), however, we lack the &ldquo;\( -1 \)&rdquo; bit. If we realize
+that playing with the indices by adding or subtracting a constant doesn&#39;t 
+change the value of the expression as long as we change all the indices, lets 
+rewrite the expectation as</p>
+
+<p>\[ 
+E(M; k) = \frac{k}{\binom{N}{k}} \sum_{m = k+1}^{N+1} \binom{m - 1}{k - 1}
+ \]</p>
+
+<p>we now have an expression in the right form for this trick based on the pmf to
+apply. Taking relationship \( \binom{N}{k} = \sum_{m = k}^{N} \binom{m-1}{k-1} \)
+and substituting, we arrive at </p>
+
+<p>\[ 
+E(M; k) = \frac{k}{\binom{N}{k}} \binom{N + 1}{k + 1}
+ \]</p>
+
+<p>No more ugly summations! If we expand the binomial coefficients we get to</p>
+
+<p>\[ 
+E(M; k) = \frac{k \frac{(N + 1)!}{(k+1)!(N-k)!}} {\frac{N!}{k! (N-k)!}}
+ \]
+\[ 
+E(M; k) = \frac{k(N+1)!k!}{(k+1)!N!}
+ \]</p>
+
+<p>If we realize that \( \frac{k!}{(k+1)!} \) cancels to \( \frac{1}{k+1} \) and that 
+\( \frac{(n+1)!}{n!} \) reduces to \( n+1 \), we can write this as</p>
+
+<p>\[ 
+E(M; k) = \frac{k (N+1)}{k+1}
+ \]</p>
+
+<p>By solving this expression for \( N \),</p>
+
+<p>\[ 
+N = \frac{M k + M}{k} - 1
+ \]</p>
+
+<p>Therefore, </p>
+
+<p>\[ 
+E(N) = E\bigg(\frac{M k + M}{k} - 1\bigg) = \frac{M k + M}{k} - 1
+ \]</p>
+
+<p>Note that this can be reduced to </p>
+
+<p>\[ 
+E(N) = M \bigg(1 + \frac{1}{k}\bigg) - 1
+ \] </p>
+
+<p>for simplicity. </p>
+
+<p>Since this is an R-centric blog after all, lets check the performance of this
+estimator against using just the sample maximum for a collection of fairly 
+small samples. According to 
+<a href="http://en.wikipedia.org/wiki/German_tank_problem#Specific_data">Wikipedia</a>, 
+a reasonable number for \( N \) under the historical context is about 300. </p>
+
+<pre><code class="r">germanTankSim &lt;- function(k, N) {
+    tanks &lt;- 1:N
+    m &lt;- max(sample(tanks, k))
+    nhat &lt;- m * (1 + 1/k) - 1
+    nhat
+}
+sampleMaxEstimator &lt;- function(k, N) {
+    tanks &lt;- 1:N
+    m &lt;- max(sample(tanks, k))
+    m
+}
+
+N &lt;- 300
+k &lt;- round(seq(0.01, 1, 0.01) * N)
+k[k == 0] &lt;- 1  # doesn&#39;t make sense with k = 0
+tanks &lt;- sapply(rep(k, each = 1000), germanTankSim, N)
+tanks &lt;- data.frame(adjustedMax = tanks, k = rep(k, each = 1000))
+tanks$sampleMax &lt;- sapply(rep(k, each = 1000), sampleMaxEstimator, N)
+</code></pre>
+
+<p>If you visualize the corrected estimator&#39;s estimate as a function of the number 
+of observed tanks, you see a pretty smooth decline in the variance of the 
+estimate and a relatively unbiased estimator of \( N \). Note that I&#39;ve used
+both jitter and alpha blending to make the changes in distribution a little 
+more clear.</p>
+
+<pre><code class="r">ggplot(tanks, aes(x = k)) + geom_jitter(aes(y = adjustedMax), alpha = 0.1, position = position_jitter(width = 1, 
+    height = 1)) + geom_hline(aes(yintercept = 300), lty = 2) + scale_x_continuous(&quot;Number of Observed Tanks&quot;) + 
+    scale_y_continuous(&quot;Unbiased Estimate of Number of Total Tanks&quot;)
+</code></pre>
+
+<p><img src="../../../img/2014-03-21/fig2.png"></p>
+
+<p>Turning towards the sample maximum, it is clearly biased towards lower values 
+for the total number of tanks. Given that the probability for a draw of a very
+small size, say 10% of the population, to contain the population maximum value,
+this makes sense. The bias decays with increased numbers of observed tanks and
+converges to the true value when \( k \sim N \). </p>
+
+<pre><code class="r">ggplot(tanks, aes(x = k)) + geom_jitter(aes(y = sampleMax), alpha = 0.1, position = position_jitter(width = 1, 
+    height = 1)) + geom_hline(aes(yintercept = 300), lty = 2) + scale_x_continuous(&quot;Number of Observed Tanks&quot;) + 
+    scale_y_continuous(&quot;Sample Max&quot;)
+</code></pre>
+
+<p><img src="../../../img/2014-03-21/fig3.png"></p>
+
+<p>If we calculate the mean square error at each value of \( k \) for the two 
+estimators, we see that the adjusted estimator has a slightly more accurate 
+estimate of \( N \) than the raw sample mean. </p>
+
+<pre><code class="r">mse &lt;- function(value, N) {
+    mean((value - N)^2)
+}
+esd &lt;- aggregate(cbind(tanks$adjustedMax, tanks$sampleMax), by = list(tanks$k), 
+    mse, N = 300)
+names(esd) &lt;- c(&quot;k&quot;, &quot;adjustMax&quot;, &quot;sampleMax&quot;)
+esd &lt;- data.frame(k = rep(esd$k, 2), mse = c(esd$adjustMax, esd$sampleMax), 
+    estimator = rep(c(&quot;Adjusted&quot;, &quot;Sample Max&quot;), each = 100))
+ggplot(esd, aes(x = k, y = mse, color = estimator)) + geom_line()
+</code></pre>
+
+<p><img src="../../../img/2014-03-21/fig4.png"></p>
+
+<p>While it started out with tanks, this method can be useful for estimating a 
+large number of different maximum values based on sequential serial numbers. 
+In the absence of sales data, estimation based on serial numbers observed in the
+wild can often provide reasonable estimates of the total number of units. It may
+also spell out the <a href="https://what-if.xkcd.com/65/">end of humanity</a>. </p>
+
+<p>It also has somewhat different estimates using Bayesian approaches, specifically
+a non-finite mean for \( k = 1 \) or \( k = 2 \) without setting a prior limit on the 
+number of units. </p>
+
+<p>And most importantly, it is fun math, statistics and computing. </p>
+
+</body>
