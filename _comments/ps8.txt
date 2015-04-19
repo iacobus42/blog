@@ -1,0 +1,14 @@
+post_id: /2015/04/15/PropensityScoreModels
+date: 2015-04-19 11:51
+return_url: 'http://jacobsimmering.com//2015/04/15/PropensityScoreModels.html'
+name: 'Jacob'
+email: ''
+link: 'jacobsimmering.com'
+comment: '@Adam, I don''t see how PS can outperform regression on a technical level because PS are generated from a regression model predicting treatment. If you add treatment to the RHS of the equation and either match on PS (as I did here), control for PS (via a regression equation) or control for the inputs to the PS model without directly estimating the PS (regression), you should get similar treatment estimates. In Mostly Harmless Econometrics (which is a good book), Angrist and Pischke motivate regression as a type of matching estimator for this reason. I don''t see the technical utility of PS over standard regression models when regression models are going to be used to estimate the PS.
+
+  They are very commonly used in the medical lit and that is probably not a bad thing. Whether you use regression or PS (or simple exact matching or any other adjustment), you should get similar estimates. My concern is really two fold. First, some treat PS are being a universal solution. There are circumstances when they are useful but they don''t provide a magical statistical solution to any threats to casual inference that aren''t protected by regression. Second, it is hard to evaluate the quality of the PS themselves. They arise out of a model, the form of the model and all the parameters are really explicitly stated. Additionally, the model often isn''t tested in any meaningful way. I''d look to the data mining literature here. My concern is with overfitting to the data set leading to inaccurate PS which leads to bad matching. My wish is that use of propensity scores would come with a detailed analysis of the model performance and perhaps more consideration of the work done in data mining. A big PS model does not mean it is better than a smaller PS model without some demonstration of out-of-sample preference for the big model.
+
+  All that said,  philosophically,  PS are nice because they are supposed to motivate explicit thought about the casual process that selects treatment. Ideally, after that they motivate thought about the casual process that determines outcomes conditional on treatment status. Rubin''s casual model has a lot going for it and is definitely something that can guide analysis.
+
+  However, I don''t see this leading to superiority of PS over regression. When one fails (due to unobserved heterogeneity, endogeneity or any other threat to validity), it seems like both would fail. '
+submit: 'Submit Comment'

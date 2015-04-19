@@ -1,0 +1,8 @@
+post_id: /2015/04/15/PropensityScoreModels
+date: 2015-04-18 11:05
+return_url: 'http://jacobsimmering.com//2015/04/15/PropensityScoreModels.html'
+name: 'Adam'
+email: ''
+link: '-'
+comment: 'if the conclusion, as described in the take-away message, is that prop scores are equal to regression (in performance), then you are absolutely wrong. Long story short, its barely possible to publish treatment comparisons in high impact medical journals without propensity score, which should be used together with regression. There is an abundanve of literature on this.'
+submit: 'Submit Comment'
