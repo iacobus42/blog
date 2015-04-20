@@ -1,0 +1,8 @@
+post_id: /2015/04/15/PropensityScoreModels
+date: 2015-04-20 12:23
+return_url: 'http://jacobsimmering.com//2015/04/15/PropensityScoreModels.html'
+name: 'Jason Bryer'
+email: ''
+link: ''
+comment: 'As I see it, most PS papers don''t go into the details about model specification because PS is more concerned with achieving balance then worrying about model specification. That is, after matching we can easily check to see if there is substantial difference in the observed covariates. Therefore, the treatment effects will be valid even if the model is not correctly specified (in your terms, again for PS we don''t care about generalizing the regression model). Moreover, if doing PS correctly, one should really use more than one method (see Rosenbaum''s 2012 paper). In general, you are going to get much better results using random forests (or other CART method) to estimate PSs. Stratification will also help (but not necessarily eliminate) issues of dropping treatment units. And on that note, it should not be surprising that the power is less in your example as you did not match all units, hence your n is smaller.'
+submit: 'Submit Comment'

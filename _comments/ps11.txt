@@ -1,0 +1,16 @@
+post_id: /2015/04/15/PropensityScoreModels
+date: 2015-04-20 12:57
+return_url: 'http://jacobsimmering.com//2015/04/15/PropensityScoreModels.html'
+name: 'Jacob'
+email: ''
+link: 'jacobsimmering.com'
+comment: '@Jason, I just stumbled across your website last night looking for a way to automate going from Rmarkdown to something ready for Jekyll. I''ve actually been going through a lot of your posts/Github content on PS this morning.  Small world, eh?
+
+  My concern with specification of a PS model is mostly to do with avoiding overfitting. I''d need to do some reading/simulation (this is not at all completely fleshed out yet) but it would seem that if you overfit such that your PS model is biased towards your data, the values you match on may not be accurate. As a result, inference based on these matches might mis-state the effect. It makes sense to toss as much as you can into a PS model --- nobody cares about p values or standard errors, you just want to predict well --- but the more you toss in, the more potential for bias for the training set.
+
+  In that sense, I''m less concerned with the specification of the PS model (which I still think should be clear for the sake of replication) but with the bias-variance tradeoff of the selected model.
+
+  I by no means think PS don''t work, they do (both in theory and practice). I just struggle to see their value as a generalized solution that some have presented them as. To my mind, if regression works so do PS and the other way around. Fundamentally, the methods are nearly identical.
+
+  That said, it seems that PS matching will generally require dropping cases when the number of controls does not far exceed the number of cases. You''d have to reduce the sample when matching on the PS. So while the PS model does shift the inference p value to the t test with possibly lower variance and hence higher power, the loss of the sample more than offsets that increase. '
+submit: 'Submit Comment'
