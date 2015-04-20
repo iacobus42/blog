@@ -1,0 +1,8 @@
+post_id: /2015/04/15/PropensityScoreModels
+date: 2015-04-20 09:01
+return_url: 'http://jacobsimmering.com//2015/04/15/PropensityScoreModels.html'
+name: 'Adam'
+email: ''
+link: ''
+comment: '@Jacob, thanks for an exhaustive answer. I really appreciate your blog post, its nice. But it is, however, important to note that PS methods are superior to regression models in some instances, and particularly when comparing two treatments (or exposures in a general sense).  Elizabeth Stuart, among others, wrote some papers on why this is the case (http://www.biostat.jhsph.edu/~estuart/papers.html). Bottom line is that the scientific community has come to acknowledge PS as the preferred method for comparing two exposures, when causality is the question. PS are actually becoming common in other settings as well (e.g. when the exposure is not assigned but inherent to the observational unit). The concern about model fit, model size, predictors, and precision of the model is of very little concern, as explained in Stewarts papers. However, I''m fond of regression, much indeed, but I won''t be able to publish with it for much longer...'
+submit: 'Submit Comment'
