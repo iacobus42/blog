@@ -1,0 +1,14 @@
+post_id: /2015/04/15/PropensityScoreModels
+date: 2015-04-21 10:48
+return_url: 'http://jacobsimmering.com//2015/04/15/PropensityScoreModels.html'
+name: 'Jacob'
+email: ''
+link: 'jacobsimmering.com'
+comment: '@Jason, thanks for your comment. I''m definitely putting up logistic regression as a strawman-style argument because that is what I have frequently seen done more frequently in order to estimate PS. Random forests, neural nets, etc are all going to be much better estimators of P(t) than something as constrained as logistic regression. However, many people doing applied work (at least in my experience in medicine/public health) tend to be unfamiliar with these methods or even uncomfortable with anything labeled "data mining" and end up using logistic regression because it is what they know.
+
+  I''ve been going through your materials and learning a fair bit about PS. They are not my specialty - I come from a more econometrically-oriented background where the major concerns are generally not the effect of the observables (those are easy to address via regression/PS/you name it) but with problems of endogeneity and unobserved heterogeneity. I''ve had a lot more of instrumental variables  work and theory than PS and so your material (and comments) have been helpful.
+
+  As a question to you (since you clearly are much more familiar with PS than I am), why doesn''t overfitting matter (this extends to random forests or any other method as well, not just logistic regression)? It seems that each unit has some true propensity to be treated and the goal of propensity scores is to estimate and match on this propensity. If your model is overfit to the data, you are going to be biased towards the particular dataset you are dealing with and may not be accurately estimating the true propensity. If you match on this inaccurately estimated estimate, how do you not risk having an invalid effect estimate?
+
+  My concern isn''t with generalizing to another sample so much as with checking the validity of the estimation of the propensity score estimates using cross-validation. But maybe it doesn''t matter if the propensity score isn''t accurately estimated (as you mention, if you achieve balance in the other factors). It has seemed (to me) that PS-based inference assumes that the PS is accurately estimated in order for everything else to be ignorable. I am quite possibly wrong. '
+submit: 'Submit Comment'

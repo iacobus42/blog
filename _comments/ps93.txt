@@ -1,0 +1,8 @@
+post_id: /2015/04/15/PropensityScoreModels
+date: 2015-04-21 10:09
+return_url: 'http://jacobsimmering.com//2015/04/15/PropensityScoreModels.html'
+name: 'Jason Bryer'
+email: ''
+link: 'www.bryer.org'
+comment: 'Small world indeed Jacob. I still think you are missing the point and are thinking about the regression (logistic) model wrong. In PSA, we don''t care if we overfit the data. That is arguably a good thing. In that phase of the analysis we are modeling treatment placement and the reason you don''t see much reported about it is that we don''t care to generalize why people are in the treatment (that''s not our research question). What we care about is balance which we assess in other ways. Lastly, I must reiterate, there are better (nonparametric) methods for prediction than logistic regression (e.g. CART methods, random forests). These, in general, avoid the model specification issues you seem to be obsessing over. And moreover, as I teach my students, will generally inform better regression models since they tend to highlight possible interaction effects.'
+submit: 'Submit Comment'
