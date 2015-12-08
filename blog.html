@@ -5,18 +5,22 @@ title: Blog | jacobsimmering.com
 <div class="home">
 
   <h1 class="page-heading">Posts</h1>
-
+  <h4>Anything I've ever posted should show up here. Click the links to read more.</h4>
+  <br>
   <ul class="post-list">
     {% for post in site.posts %}
   <div class="post_info">
     <li>
             <a href="{{ post.url }}">{{ post.title }}</a>
             <span>({{ post.date | date:"%b %-d, %Y"}})</span><br>
-    <em>{{ post.lede }} </em><br>
+    <p class="message">
+      {{ post.lede }} 
+    </p>
+    <br>
     </li>
     </div>    
     {% endfor %}
   </ul>
 
-  <p class="rss-subscribe">subscribe <a href="{{ "/feed.xml" | prepend: site.baseurl }}">via RSS</a></p>
+  <p class="rss-subscribe"><i class="fa fa-rss"></i> subscribe to <a href="{{ "/rss.xml" | prepend: site.baseurl }}">this feed</a> for only R posts or <a href="{{ "/feed.xml" | prepend: site.baseurl }}">here</a> for all posts via RSS</p>
 </div>

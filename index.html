@@ -1,23 +1,37 @@
 ---
 layout: default
+title: Home
 ---
 
-<p>In case you missed the obvious, I'm Jacob Simmering. By day, I am a graduate student at the <a href="http://www.uiowa.edu/">University of Iowa</a> and by night, well, I am pretty much the same thing. I am interested in statistical computing and applied statistics, especially in the domains of healthcare and health economics.</p>
+<div class="posts">
+  {% for post in paginator.posts %}
+  <div class="post">
+    <h1 class="post-title">
+      <a href="{{ post.url }}">
+        {{ post.title }}
+      </a>
+    </h1>
 
-<p>Various projects doing fun and interesting stuff (by my standards) can be found at my <a href="http://www.github.com/iacobus42">GitHub page</a>. Commentary on those fun projects, or whatever else sounds interesting at the moment, will be found on my <a href="/blog.html">blog</a>.</p>
+    <span class="post-date">{{ post.date | date_to_string }}</span>
 
-<h2>My most recent blog posts</h2>
-<ul class="posts">
-{% for post in site.posts limit: 5 %}
-  <div class="post_info">
-    <li>
-            <a href="{{ post.url }}">{{ post.title }}</a>
-            <span>({{ post.date | date:"%Y-%m-%d" }})</span><br>
-    </li>
-    <em>{{ post.lede }} </em><br>
-    </div>
+    {{ post.content }}
+  </div>
   {% endfor %}
-</ul>
-<br>
-<br>
-<br>
+</div>
+
+<div class="pagination">
+  {% if paginator.next_page %}
+    <a class="pagination-item older" href="{{ site.baseurl }}page{{paginator.next_page}}">Older</a>
+  {% else %}
+    <span class="pagination-item older">Older</span>
+  {% endif %}
+  {% if paginator.previous_page %}
+    {% if paginator.page == 2 %}
+      <a class="pagination-item newer" href="{{ site.baseurl }}">Newer</a>
+    {% else %}
+      <a class="pagination-item newer" href="{{ site.baseurl }}page{{paginator.previous_page}}">Newer</a>
+    {% endif %}
+  {% else %}
+    <span class="pagination-item newer">Newer</span>
+  {% endif %}
+</div>
