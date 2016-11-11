@@ -1,0 +1,302 @@
+---
+layout: post
+title: Easy Cross Validation in R with `modelr`
+date: 2016-11-11
+niceDate: Nov 11, 2016
+lede: Cross-validation is a useful approach for estimating out-of-sample error. The `modelr` package has made estimating models with cross-validation much easier, and the `resample` object type is vital for cross-validation with large data in R. 
+rstats: TRUE
+id: 20161111
+---
+
+
+<style>
+pre { 
+   margin-top: 0;
+   max-width: 95%;
+   border: 1px solid #ccc;
+   white-space: pre-wrap;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code.r, code.cpp {
+   background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * { 
+      background: transparent !important; 
+      color: black !important; 
+      filter:none !important; 
+      -ms-filter: none !important; 
+   }
+
+   body { 
+      font-size:12pt; 
+      max-width:100%; 
+   }
+       
+   a, a:visited { 
+      text-decoration: underline; 
+   }
+
+   hr { 
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote { 
+      padding-right: 1em; 
+      page-break-inside: avoid; 
+   }
+
+   tr, img { 
+      page-break-inside: avoid; 
+   }
+
+   img { 
+      max-width: 100% !important; 
+   }
+
+   @page :left { 
+      margin: 15mm 20mm 15mm 10mm; 
+   }
+     
+   @page :right { 
+      margin: 15mm 10mm 15mm 20mm; 
+   }
+
+   p, h2, h3 { 
+      orphans: 3; widows: 3; 
+   }
+
+   h2, h3 { 
+      page-break-after: avoid; 
+   }
+}
+
+</style>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: rgb(88, 72, 246)
+   }
+
+   pre .number {
+     color: rgb(0, 0, 205);
+   }
+
+   pre .comment {
+     color: rgb(76, 136, 107);
+   }
+
+   pre .keyword {
+     color: rgb(0, 0, 255);
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: rgb(3, 106, 7);
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+
+<!-- MathJax scripts -->
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+</head>
+
+<body>
+
+<div id="cross-validation-and-model-selection" class="section level1">
+<p>When estimating a model, the quality of the model fit will always be higher in-sample than out-of-sample. A model will always fit the data that it is trained on, warts and all, and may use those warts and statistical noise to make predictions. As a result, a model that performs very well on a data set may perform poorly when used more generally.</p>
+<p>Since we often can’t fit a model, put it in use and determine how well it performs (and probably wouldn’t want to even if we could), we need some methods for predicting out-of-sample error when only using the data we have.</p>
+<p>The simplest method is to randomly divide the data into a training set and a test set. However, this provides only one test set. If you train a model, test it and then train a new model and re-test it using the same test set and see an improvement, it may have come from the model actually being better or it may come from you over-fitting the test set.</p>
+<p>One possible way to address this problem is to use something like k-fold cross validation. The general idea is is to use some portion of your data (typically 90%) to fit a model and then test that model on the withheld portion (typically 10%) to assess the quality of the model fit. You would repeat this process over and over again until each point has been used to estimate the model <span class="math inline">\(k-1\)</span> times and been included in the test set 1 time.</p>
+<p>This can be done with a loop or a member of the <code>apply</code> family, but I’m going to use <a href="https://github.com/hadley/purrr"><code>purrr</code></a> to write functional code to fit the models and <a href="https://github.com/hadley/modelr"><code>modelr</code></a> to evaluate the models.</p>
+<p>My “preamble” looks like this:</p>
+<div id="data-and-the-model" class="section level2">
+<h2>Data and the Model</h2>
+<p>For this example, I’m going to use the <code>cars</code> dataset from the <code>caret</code> package. It looks like this:</p>
+<pre class="r"><code>data(&quot;cars&quot;, package = &quot;caret&quot;)
+glimpse(cars)</code></pre>
+<pre><code>## Observations: 804
+## Variables: 18
+## $ Price       &lt;dbl&gt; 22661.05, 21725.01, 29142.71, 30731.94, 33358.77, ...
+## $ Mileage     &lt;int&gt; 20105, 13457, 31655, 22479, 17590, 23635, 17381, 2...
+## $ Cylinder    &lt;int&gt; 6, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,...
+## $ Doors       &lt;int&gt; 4, 2, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4,...
+## $ Cruise      &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,...
+## $ Sound       &lt;int&gt; 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1,...
+## $ Leather     &lt;int&gt; 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1,...
+## $ Buick       &lt;int&gt; 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+## $ Cadillac    &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+## $ Chevy       &lt;int&gt; 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+## $ Pontiac     &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+## $ Saab        &lt;int&gt; 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,...
+## $ Saturn      &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+## $ convertible &lt;int&gt; 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,...
+## $ coupe       &lt;int&gt; 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+## $ hatchback   &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...
+## $ sedan       &lt;int&gt; 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,...
+## $ wagon       &lt;int&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,...</code></pre>
+<p>We want to build a model to predict the price of the car. We have the mileage, number of cylinders, size, some features (cruise control, sound system, leather seats), brand and then the style of car. The data already has dummy variables constructed but we need to drop one in order to estimate the model (e.g., set it as the reference level). We’ll drop the brand Chevy indicator (setting Chevy to the reference brand) and set the reference style to sedan. We’ll also drop the doors variable as that is perfectly co-linear with the coupe indicator and styles likely contain more information than the number of doors.</p>
+<p>Our final model will look something like this:</p>
+<pre><code>select(cars, -Doors, -Chevy, -sedan) %&gt;% 
+  lm(Price ~ Milage + Cylinder + Cruise + Sound + Leather + Buick + Cadillac + 
+  Pontiac + Saab + Saturn + convertible + coupe + hatchback + wagon, data = .)</code></pre>
+<p>The <code>modelr</code> package has a useful tool for making the cross-validation folds. <code>crossv_kfold</code> will divide the data into <span class="math inline">\(k\)</span> (by default 10) folds and returns a tibble with the list-columns of <code>train</code> (the training data for the fold), <code>test</code> (the test set for the fold) and <code>.id</code> (the fold number). For more details on the idea of list-columns, see the <a href="http://r4ds.had.co.nz/many-models.html">Many Models Chapter in R for Data Science</a> by Garrett Grolemund and Hadley Wickham.</p>
+<pre class="r"><code>cars_cv &lt;- cars %&gt;%
+  select(-Doors, -Chevy, -sedan) %&gt;%
+  crossv_kfold(10)
+cars_cv</code></pre>
+<pre><code>## # A tibble: 10 × 3
+##             train           test   .id
+##            &lt;list&gt;         &lt;list&gt; &lt;chr&gt;
+## 1  &lt;S3: resample&gt; &lt;S3: resample&gt;    01
+## 2  &lt;S3: resample&gt; &lt;S3: resample&gt;    02
+## 3  &lt;S3: resample&gt; &lt;S3: resample&gt;    03
+## 4  &lt;S3: resample&gt; &lt;S3: resample&gt;    04
+## 5  &lt;S3: resample&gt; &lt;S3: resample&gt;    05
+## 6  &lt;S3: resample&gt; &lt;S3: resample&gt;    06
+## 7  &lt;S3: resample&gt; &lt;S3: resample&gt;    07
+## 8  &lt;S3: resample&gt; &lt;S3: resample&gt;    08
+## 9  &lt;S3: resample&gt; &lt;S3: resample&gt;    09
+## 10 &lt;S3: resample&gt; &lt;S3: resample&gt;    10</code></pre>
+<p>You might notice that instead of the elements being <code>data.frame</code> or <code>tibble</code>, they are <code>resample</code> objects. <code>resample</code> objects are cool because they are lazy. Instead of making 10 copies of <code>cars</code>, <code>crossv_kfold()</code> returned what are essentially pointers to the original data. So instead of storing the data 10 times, we store it once plus a little bit for the pointers. Indeed, we can see that in the object size:</p>
+<pre class="r"><code>pryr::object_size(cars)</code></pre>
+<pre><code>## 63.6 kB</code></pre>
+<pre class="r"><code>pryr::object_size(cars_cv)</code></pre>
+<pre><code>## 93.7 kB</code></pre>
+<p>Awesome, right?</p>
+<p>Now it is time to fit the model. It all can be down within the very tidy tidyverse (see what I did there?). The code below uses <code>purrr:map()</code> to fit the model for each one of the 10 folds and returns the RMSE on the test set.</p>
+<pre class="r"><code>cars_cv %&gt;% 
+  mutate(train = map(train, as_tibble)) %&gt;%
+  mutate(model = map(train, ~ lm(Price ~ Mileage + Cylinder + Cruise + Sound + 
+                                   Leather + Buick + Cadillac + Pontiac + 
+                                   Saab + Saturn + convertible + coupe + 
+                                   hatchback + wagon, 
+                                 data = .))) %&gt;%
+  mutate(rmse = map2_dbl(model, test, rmse)) %&gt;%
+  select(.id, rmse)</code></pre>
+<pre><code>## # A tibble: 10 × 2
+##      .id     rmse
+##    &lt;chr&gt;    &lt;dbl&gt;
+## 1     01 2372.046
+## 2     02 2844.509
+## 3     03 3398.572
+## 4     04 3165.065
+## 5     05 2838.691
+## 6     06 2675.153
+## 7     07 3720.843
+## 8     08 2692.567
+## 9     09 2362.007
+## 10    10 3016.648</code></pre>
+<p>It is reasonably fast too.</p>
+<pre class="r"><code>ten_fold &lt;- function(x) {
+  x %&gt;% 
+    mutate(model = map(train, ~ lm(Price ~ Mileage + Cylinder + Cruise + Sound + 
+                                   Leather + Buick + Cadillac + Pontiac + 
+                                   Saab + Saturn + convertible + coupe + 
+                                   hatchback + wagon, 
+                                 data = .))) %&gt;%
+  mutate(rmse = map2_dbl(model, test, rmse)) %&gt;%
+  select(.id, rmse)
+}
+
+microbenchmark::microbenchmark(ten_fold(cars_cv))</code></pre>
+<pre><code>## Unit: milliseconds
+##               expr      min       lq     mean   median       uq      max
+##  ten_fold(cars_cv) 45.47155 50.18167 61.01467 53.27679 60.67367 139.0201
+##  neval
+##    100</code></pre>
+<p><code>microbenchmark</code> puts it a median time of about 50 ms. We can probably make it even faster though. We don’t actually need to store the model and we can do it all in one step with a function.</p>
+<pre class="r"><code>fitter &lt;- function(training_data, testing_data) {
+  lm(Price ~ Mileage + Cylinder + Cruise + Sound + Leather + Buick + Cadillac + 
+       Pontiac + Saab + Saturn + convertible + coupe + hatchback + wagon, 
+     data = training_data) %&gt;% 
+    rmse(testing_data)
+}
+
+ten_fold_2 &lt;- function(x) {
+  x %&gt;% 
+    mutate(rmse = map2_dbl(train, test, fitter)) %&gt;%
+    select(.id, rmse)
+}
+
+microbenchmark::microbenchmark(ten_fold_2(cars_cv))</code></pre>
+<pre><code>## Unit: milliseconds
+##                 expr     min       lq     mean   median       uq      max
+##  ten_fold_2(cars_cv) 46.1202 49.16919 52.21734 51.25691 53.72752 100.7599
+##  neval
+##    100</code></pre>
+<p>Hey, that saved 2 or 3 milliseconds on the median. Totally worth it. (If your model fit takes a long time, it is probably worth it).</p>
+<p>It is possible to parallelize the model fitting using <a href="https://github.com/hadley/multidplyr/"><code>multidplyr</code></a> as the backend for <code>dplyr</code>; however, <code>multidplyr</code> doesn’t seem to work well with the <code>resample</code> objects. The easiest solution is to store nine copies of the data to allow for the cross-validation to work most simply - but I’m more likely to hurt for shortage of memory than shortage of CPU cycles/time when dealing with health care administrative data. Alternatively, you could use <code>do()</code> and <code>multidplyr</code> to filter by fold ID, fit a model, compute RMSE and proceed from there, but that solution is much less simple.</p>
+<p>Packages like <code>caret</code> do provide powerful tools for cross-validation; however, I like the ability to keep my entire workflow smooth and within the tidyverse. I found that, in general, I prefer to use the <code>modelr</code> tools and do the model fitting the “old fashioned way.”</p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
