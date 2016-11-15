@@ -1,0 +1,314 @@
+---
+layout: post
+title: Using tidytext to make sentiment analysis easy
+date: 2016-11-15
+niceDate: Nov 15, 2016
+lede: I recently discovered the R package `tidytext` and fell in love with it. It combines the "tidy" ecosystem, which I'm very familar and comfortable in, with natural language processing (something that has been more challenging for me, not least of all because it rarely is tidy). I loved playing the package and modeling how my language and sentiments varied in my thesis. The heavy use of Jane Austen in the `tidytext` examples certainly didn't hurt either. 
+tags: r tidytext tidyverse text sentiment
+rstats: TRUE
+id: 20161115
+---
+
+
+<style>
+pre { 
+   margin-top: 0;
+   max-width: 95%;
+   border: 1px solid #ccc;
+   white-space: pre-wrap;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code.r, code.cpp {
+   background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * { 
+      background: transparent !important; 
+      color: black !important; 
+      filter:none !important; 
+      -ms-filter: none !important; 
+   }
+
+   body { 
+      font-size:12pt; 
+      max-width:100%; 
+   }
+       
+   a, a:visited { 
+      text-decoration: underline; 
+   }
+
+   hr { 
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote { 
+      padding-right: 1em; 
+      page-break-inside: avoid; 
+   }
+
+   tr, img { 
+      page-break-inside: avoid; 
+   }
+
+   img { 
+      max-width: 100% !important; 
+   }
+
+   @page :left { 
+      margin: 15mm 20mm 15mm 10mm; 
+   }
+     
+   @page :right { 
+      margin: 15mm 10mm 15mm 20mm; 
+   }
+
+   p, h2, h3 { 
+      orphans: 3; widows: 3; 
+   }
+
+   h2, h3 { 
+      page-break-after: avoid; 
+   }
+}
+
+</style>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: rgb(88, 72, 246)
+   }
+
+   pre .number {
+     color: rgb(0, 0, 205);
+   }
+
+   pre .comment {
+     color: rgb(76, 136, 107);
+   }
+
+   pre .keyword {
+     color: rgb(0, 0, 255);
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: rgb(3, 106, 7);
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+
+<!-- MathJax scripts -->
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+</head>
+
+
+<p>Last week I discovered the R package <a href="https://github.com/juliasilge/tidytext"><code>tidytext</code></a> and its very nice <a href="http://tidytextmining.com/index.html">e-book</a> detailing usage. Julia Silge and David Robinson have significantly reduced the effort it takes for me to “grok” text mining by making it “tidy.”</p>
+<p>It certainly helped that a lot of the examples are from Pride and Prejudice and other books by Jane Austen, my most beloved author. Julia Silge’s examples on her blog doing <a href="http://juliasilge.com/blog/You-Must-Allow-Me/">NLP</a> and <a href="http://juliasilge.com/blog/If-I-Loved-NLP-Less/">sentiment analysis</a> alone would have made me a life-long fan. The gifs from P&amp;P (mostly the 1995 mini-series, to be honest) on her posts and the references in the titles made me very excited. My brain automatically started playing the theme and made me smile.</p>
+<p>Okay, enough of that. Moving on.</p>
+<p>Seeing her work, I started wondering what I can model to get some insight into my own life. I have a database of 92,372 text messages (basically every message sent to or from me from sometime in 2011/2012 to 2015) but text messages were weird (lots of “lol” and “haha”’s). I think there is some interesting insights there, but probably not what I wanted to cover today.</p>
+<p>So I started thinking what other plain text data did I have that might be interesting. And then I realized I have a 149 page dissertation (excluding boilerplate and references) <em>and</em> it was in LaTeX (so easy to parse) <em>and</em> it was written in 5 different files that relate directly to the chapters (intro, lit review, methods, results and a discussion). I could do something with that!</p>
+<p>My thesis is currently under embargo while I chop it into its respective papers (one under review, one soon to be under review and one undergoing a final revision. So close.), so I can’t link to it. However, it relates the seasonality of two infectious diseases and local weather patterns.</p>
+<p>I wonder how my sentiment changes across the thesis. To do this, I’ll use the <code>tidytext</code> package. Let’s import the relevant packages now.</p>
+<pre class="r"><code>library(tidyverse)
+library(tidytext)
+library(stringr)</code></pre>
+<p>The <code>tidyverse</code> ecosystem and <code>tidytext</code> play well together (no surprises there) and so I also import <code>tidyverse</code>. The <code>stringr</code> package is useful for filtering out the LaTeX specific code and also for dropping words that have numbers in them (like <code>jefferson1776</code> as a reference or <code>0.05</code>).</p>
+<p>Now let’s read in the data (the tex files)</p>
+<pre class="r"><code>thesis_words &lt;- data_frame(file = paste0(&quot;~/thesis/thesis/&quot;, 
+                         c(&quot;introduction.tex&quot;, &quot;lit-review.tex&quot;, &quot;methods.tex&quot;, 
+                           &quot;results.tex&quot;, &quot;discussion.tex&quot;))) %&gt;%
+  mutate(text = map(file, read_lines))
+thesis_words</code></pre>
+<pre><code>## # A tibble: 5 × 2
+##                               file          text
+##                              &lt;chr&gt;        &lt;list&gt;
+## 1 ~/thesis/thesis/introduction.tex   &lt;chr [125]&gt;
+## 2   ~/thesis/thesis/lit-review.tex &lt;chr [1,386]&gt;
+## 3      ~/thesis/thesis/methods.tex   &lt;chr [625]&gt;
+## 4      ~/thesis/thesis/results.tex &lt;chr [1,351]&gt;
+## 5   ~/thesis/thesis/discussion.tex   &lt;chr [649]&gt;</code></pre>
+<p>The resulting tibble has a variable <code>file</code> that is the name of the file that created that row and a list-column of the text of that file.</p>
+<p>We want to <code>unnest()</code> that tibble, remove the lines that are LaTeX crude (either start with <code>\[A-Z]</code> or <code>\[a-z]</code>, like <code>\section</code> or <code>\figure</code>) and compute a line number.</p>
+<pre class="r"><code>thesis_words &lt;- thesis_words %&gt;%
+  unnest() %&gt;%
+  filter(text != &quot;%!TEX root = thesis.tex&quot;) %&gt;%
+  filter(!str_detect(text, &quot;^(\\\\[A-Z,a-z])&quot;),
+         text != &quot;&quot;) %&gt;%
+  mutate(line_number = 1:n(),
+         file = str_sub(basename(file), 1, -5))
+thesis_words$file &lt;- forcats::fct_relevel(thesis_words$file, c(&quot;introduction&quot;,
+                                                  &quot;lit-review&quot;,
+                                                  &quot;methods&quot;,
+                                                  &quot;results&quot;,
+                                                  &quot;discussion&quot;))</code></pre>
+<p>Now we have a tibble with <code>file</code> giving us the chapter, <code>text</code> giving us the line of text from the tex files (when I wrote it, I strived to keep my line lengths under 80 characters, hence the relatively short value in <code>text</code>) and <code>line_number</code> giving a counter of the number of lines since the start of the thesis.</p>
+<p>Now we want to tokenize (strip each word of any formatting and reduce down to the root word, if possible). This is easy with <code>unnest_tokens()</code>. I’ve also played around with the results and came up with some other words that needed to be deleted (stats terms like <code>ci</code> or <code>p</code>, LaTeX terms like <code>_i</code> or <code>tabular</code> and references/numbers).</p>
+<pre class="r"><code>thesis_words &lt;- thesis_words %&gt;%
+  unnest_tokens(word, text) %&gt;%
+  filter(!str_detect(word, &quot;[0-9]&quot;),
+         word != &quot;fismanreview&quot;,
+         word != &quot;multicolumn&quot;,
+         word != &quot;p&quot;,
+         word != &quot;_i&quot;,
+         word != &quot;c&quot;, 
+         word != &quot;ci&quot;,
+         word != &quot;al&quot;,
+         word != &quot;dowellsars&quot;,
+         word != &quot;h&quot;,
+         word != &quot;tabular&quot;,
+         word != &quot;t&quot;,
+         word != &quot;ref&quot;,
+         word != &quot;cite&quot;,
+         !str_detect(word, &quot;[a-z]_&quot;),
+         !str_detect(word, &quot;:&quot;),
+         word != &quot;bar&quot;,
+         word != &quot;emph&quot;,
+         !str_detect(word, &quot;textless&quot;))
+thesis_words</code></pre>
+<pre><code>## # A tibble: 27,787 × 3
+##            file line_number        word
+##          &lt;fctr&gt;       &lt;int&gt;       &lt;chr&gt;
+## 1  introduction           1 seasonality
+## 2  introduction           1          or
+## 3  introduction           1         the
+## 4  introduction           1    periodic
+## 5  introduction           1      surges
+## 6  introduction           1         and
+## 7  introduction           1       lulls
+## 8  introduction           1          in
+## 9  introduction           1   incidence
+## 10 introduction           1          is
+## # ... with 27,777 more rows</code></pre>
+<p>Now to compute the sentiment using the words written per line in the thesis. <code>tidytext</code> comes with three sentiment lexicons, <code>affin</code>, <code>bing</code> and <code>nrc</code>. <code>affin</code> provides a score ranging from -5 (very negative) to +5 (very positive) fr 2,476 words. <code>bing</code> provides a label of “negative” or “positive” for 6,788 words. <code>nrc</code> provides a label (anger, anticipation, disgust, fear, joy, negative, positive, sadness, surprise or trust) for 13,901 words. None of these account for negation (“I’m not sad” is a negative sentiment, not a positive one).</p>
+<p>Using the <code>nrc</code> lexicon, let’s see how the emotions of my words change over the thesis.</p>
+<pre class="r"><code>thesis_words %&gt;%
+  inner_join(get_sentiments(&quot;nrc&quot;)) %&gt;%
+  group_by(index = line_number %/% 25, file, sentiment) %&gt;%
+  summarize(n = n()) %&gt;%
+  ggplot(aes(x = index, y = n, fill = file)) + 
+  geom_bar(stat = &quot;identity&quot;, alpha = 0.8) + 
+  facet_wrap(~ sentiment, ncol = 5) </code></pre>
+<p><img src="../../../img/2016-11-17/nrc_thesis_fig-1.png" width="672" /></p>
+<p>I wasn’t surprised, but at least I wasn’t sad? It looks like I used more “fear” and “negative” words in the lit-review than the other sections. However, it looks like “infectious” as in “infectious diseases” is a fear/negative word. I used that word a lot more in the lit review than other sections.</p>
+<p>I can use the <code>bing</code> and <code>afinn</code> lexicons to look at how the sentiment of the words changed over the course of the thesis.</p>
+<pre class="r"><code>thesis_words %&gt;% 
+  left_join(get_sentiments(&quot;bing&quot;)) %&gt;%
+  left_join(get_sentiments(&quot;afinn&quot;)) %&gt;%
+  group_by(index = line_number %/% 25, file) %&gt;%
+  summarize(afinn = mean(score, na.rm = TRUE), 
+            bing = sum(sentiment == &quot;positive&quot;, na.rm = TRUE) - sum(sentiment == &quot;negative&quot;, na.rm = TRUE)) %&gt;%
+  gather(lexicon, lexicon_score, afinn, bing) %&gt;% 
+  ggplot(aes(x = index, y = lexicon_score, fill = file)) +
+    geom_bar(stat = &quot;identity&quot;) + 
+    facet_wrap(~ lexicon, scale = &quot;free_y&quot;) +
+    scale_x_continuous(&quot;Location in thesis&quot;, breaks = NULL) +
+    scale_y_continuous(&quot;Lexicon Score&quot;)</code></pre>
+<p><img src="../../../img/2016-11-17/thesis_sentiment_fig-1.png" width="672" /></p>
+<p>Looking at the two lexicon’s scoring of my thesis, the <code>bing</code> lexicon seems a little more stable if we assume local correlation of sentiments is likely. It seems like I started out all doom and gloom (hey, I needed to convince my committee that it was a real problem!), moved onto more doom and gloom (did I mention this is a problem and my question hasn’t been resolved?), the methods were more neutral, results were more doom and gloom but with a slight uplift at the end followed by more doom and gloom (this really is a problem guys!) and a little bit of hope at the end (now that we know, we can fix this?).</p>
+<p>This got me thinking about what a typical academic paper looks like. My mental model for a paper is:</p>
+<ol style="list-style-type: decimal">
+<li>show that the problem is really a problem (“<disease of interest> is a significant cause of morbidity and mortality”)</li>
+<li>show that the problem isn’t resolved by the prior work</li>
+<li>answer the question</li>
+<li>incorporate the answer into the existing literature</li>
+<li>discussion limitations and breezily dismiss them</li>
+<li>show hope for the future</li>
+</ol>
+<p>So I pulled the text of my 4 currently published papers. I’m going to call them <a href="http://www.jstor.org/stable/10.1086/675281">well-children</a>, <a href="http://www.sciencedirect.com/science/article/pii/S1551741114000242">medication time series</a>, <a href="https://www.cambridge.org/core/journals/infection-control-and-hospital-epidemiology/article/hospital-transfer-network-structure-as-a-risk-factor-for-clostridium-difficile-infection/5EF752664DEEDA0AD32B79314B704CD9">transfer networks</a> and <a href="http://journal.copdfoundation.org/jcopdf/id/1125/Identifying-Patients-With-COPD-at-High-Risk-of-Readmission">COPD readmissions</a>.</p>
+<p>I took the text out of each paper and copied them into plain text files and read them into R as above. I also computed line numbers within each of the different papers.</p>
+<pre class="r"><code>paper_words &lt;- data_frame(file = paste0(&quot;~/projects/paper_analysis/&quot;, 
+                                         c(&quot;well_child.txt&quot;, &quot;pharm_ts.txt&quot;,
+                                           &quot;transfers.txt&quot;, &quot;copd.txt&quot;))) %&gt;%
+  mutate(text = map(file, read_lines)) %&gt;%
+  unnest() %&gt;%
+  group_by(file = str_sub(basename(file), 1, -5)) %&gt;%
+  mutate(line_number = row_number()) %&gt;%
+  ungroup() %&gt;%
+  unnest_tokens(word, text) 
+
+paper_sentiment &lt;- inner_join(paper_words, get_sentiments(&quot;bing&quot;)) %&gt;%
+  count(file, index = round(line_number / max(line_number) * 100 / 5) * 5, sentiment) %&gt;%
+  spread(sentiment, n, fill = 0) %&gt;%
+  mutate(net_sentiment = positive - negative)
+
+paper_sentiment %&gt;% ggplot(aes(x = index, y = net_sentiment, fill = file)) + 
+  geom_bar(stat = &quot;identity&quot;, show.legend = FALSE) + 
+  facet_wrap(~ file) + 
+  scale_x_continuous(&quot;Location in paper (percent)&quot;) + 
+  scale_y_continuous(&quot;Bing Net Sentiment&quot;)</code></pre>
+<p><img src="../../../img/2016-11-17/paper_sentiment_fig-1.png" width="672" /></p>
+<p>It looks like I wasn’t totally off. Most of the papers start out relatively negative, have super negative results sections (judging by paper location) but I was wrong about them ending on a happy note.</p>
+<p>And the sentiment for this post:</p>
+<p><img src="../../../img/2016-11-17/post_sentiment_fig-1.png" width="672" /></p>
+<p>Talking about negative sentiments is a negative sentiment. But look at the start when I was talking about Austen… that was a good time.</p>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+$(document).ready(function () {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
