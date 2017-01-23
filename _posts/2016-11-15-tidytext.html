@@ -10,6 +10,7 @@ id: 20161115
 ---
 
 
+
 <style>
 pre { 
    margin-top: 0;
@@ -144,7 +145,6 @@ hljs.initHighlightingOnLoad();
 
 
 </head>
-
 
 <p>Last week I discovered the R package <a href="https://github.com/juliasilge/tidytext"><code>tidytext</code></a> and its very nice <a href="http://tidytextmining.com/index.html">e-book</a> detailing usage. Julia Silge and David Robinson have significantly reduced the effort it takes for me to “grok” text mining by making it “tidy.”</p>
 <p>It certainly helped that a lot of the examples are from Pride and Prejudice and other books by Jane Austen, my most beloved author. Julia Silge’s examples on her blog doing <a href="http://juliasilge.com/blog/You-Must-Allow-Me/">NLP</a> and <a href="http://juliasilge.com/blog/If-I-Loved-NLP-Less/">sentiment analysis</a> alone would have made me a life-long fan. The gifs from P&amp;P (mostly the 1995 mini-series, to be honest) on her posts and the references in the titles made me very excited. My brain automatically started playing the theme and made me smile.</p>
@@ -285,30 +285,3 @@ paper_sentiment %&gt;% ggplot(aes(x = index, y = net_sentiment, fill = file)) +
 <p>And the sentiment for this post:</p>
 <p><img src="../../../img/2016-11-17/post_sentiment_fig-1.png" width="672" /></p>
 <p>Talking about negative sentiments is a negative sentiment. But look at the start when I was talking about Austen… that was a good time.</p>
-
-
-
-
-</div>
-
-<script>
-
-// add bootstrap table styles to pandoc tables
-$(document).ready(function () {
-  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
-});
-
-
-</script>
-
-<!-- dynamically load mathjax for compatibility with self-contained -->
-<script>
-  (function () {
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
-    document.getElementsByTagName("head")[0].appendChild(script);
-  })();
-</script>
-
-</body>

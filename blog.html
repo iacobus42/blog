@@ -2,6 +2,7 @@
 layout: default
 title: Blog | jacobsimmering.com
 ---
+
 <div class="home">
 
   <h1 class="page-heading">Posts</h1>
@@ -9,15 +10,15 @@ title: Blog | jacobsimmering.com
   <br>
   <ul class="post-list">
     {% for post in site.posts %}
-  <div class="post_info">
-    <li>
-            <a href="{{ post.url }}">{{ post.title }}</a>
-            <span>({{ post.date | date:"%b %-d, %Y"}})</span><br>
-    <p class="message">
-      {{ post.lede }} 
-    </p>
-    <br>
-    </li>
+    <div class="post_info">
+      <li>
+        <a href="{{ post.url }}">{{ post.title }}</a>
+        <span>({{ post.date | date:"%b %-d, %Y"}})</span><br>
+        <p class="message">
+        {{ post.lede }} 
+        </p>
+      <br>
+      </li>
     </div>    
     {% endfor %}
   </ul>
