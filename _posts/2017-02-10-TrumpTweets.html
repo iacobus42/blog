@@ -1,0 +1,400 @@
+---
+layout: post
+title: Poor Donald - his tweets keep getting more negative
+date: 2017-02-10
+niceDate: Feb 10, 2017
+lede: Even though Donald Trump won the election, has been sworn in and has been causing complete chaos for weeks now, his tweets keep getting more negative. Perhaps being president isn't that much fun.
+tags: r statistics text tidytext
+rstats: FALSE
+id: 20170210
+---
+
+
+<style>
+pre { 
+   margin-top: 0;
+   max-width: 95%;
+   border: 1px solid #ccc;
+   white-space: pre-wrap;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code.r, code.cpp {
+   background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * { 
+      background: transparent !important; 
+      color: black !important; 
+      filter:none !important; 
+      -ms-filter: none !important; 
+   }
+
+   body { 
+      font-size:12pt; 
+      max-width:100%; 
+   }
+       
+   a, a:visited { 
+      text-decoration: underline; 
+   }
+
+   hr { 
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote { 
+      padding-right: 1em; 
+      page-break-inside: avoid; 
+   }
+
+   tr, img { 
+      page-break-inside: avoid; 
+   }
+
+   img { 
+      max-width: 100% !important; 
+   }
+
+   @page :left { 
+      margin: 15mm 20mm 15mm 10mm; 
+   }
+     
+   @page :right { 
+      margin: 15mm 10mm 15mm 20mm; 
+   }
+
+   p, h2, h3 { 
+      orphans: 3; widows: 3; 
+   }
+
+   h2, h3 { 
+      page-break-after: avoid; 
+   }
+}
+
+</style>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: rgb(88, 72, 246)
+   }
+
+   pre .number {
+     color: rgb(0, 0, 205);
+   }
+
+   pre .comment {
+     color: rgb(76, 136, 107);
+   }
+
+   pre .keyword {
+     color: rgb(0, 0, 255);
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: rgb(3, 106, 7);
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+
+<!-- MathJax scripts -->
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+</head>
+
+<p>Last summer, David Robinson did this interesting <a href="http://varianceexplained.org/r/trump-tweets/">text analysis</a> of Donald Trump’s tweets and found that they more angry ones came from Android (which Trump is known to use). But he didn’t consider how Trump’s emotional state varies over time and he certainly couldn’t have considered what the impact of the election and recent events would have been on Trump.</p>
+<p>Using the <code>twitteR</code> package and the <code>tidyverse</code> ecosystem (plus <code>tidytext</code>) this is actually a very simple analysis.</p>
+<p>For starters, pulling Trump’s tweets (the last 3,200) is very simple:</p>
+<pre class="r"><code>library(twitteR)
+library(tidyverse)
+library(tidytext)
+
+source(&quot;~/twitter_key.R&quot;)
+
+setup_twitter_oauth(api_key, api_secret, access_token, access_token_secret)</code></pre>
+<pre><code>## [1] &quot;Using direct authentication&quot;</code></pre>
+<pre class="r"><code>trump &lt;- userTimeline(&quot;realDonaldTrump&quot;,
+                      n = 3100,
+                      includeRts = TRUE,
+                      excludeReplies = FALSE) %&gt;%
+  twListToDF() %&gt;%
+  as_tibble()</code></pre>
+<p>And then we have a tidy tibble with Trump’s tweets:</p>
+<pre class="r"><code>glimpse(trump)</code></pre>
+<pre><code>## Observations: 3,099
+## Variables: 16
+## $ text          &lt;chr&gt; &quot;Heading to Joint Base Andrews on #MarineOne wit...
+## $ favorited     &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,...
+## $ favoriteCount &lt;dbl&gt; 77699, 85576, 71312, 220083, 64348, 84125, 62284...
+## $ replyToSN     &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
+## $ created       &lt;time&gt; 2017-02-10 23:24:51, 2017-02-10 13:35:50, 2017-...
+## $ truncated     &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, ...
+## $ replyToSID    &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
+## $ id            &lt;chr&gt; &quot;830195857530183684&quot;, &quot;830047626414477312&quot;, &quot;830...
+## $ replyToUID    &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
+## $ statusSource  &lt;chr&gt; &quot;&lt;a href=\&quot;http://twitter.com/download/iphone\&quot; ...
+## $ screenName    &lt;chr&gt; &quot;realDonaldTrump&quot;, &quot;realDonaldTrump&quot;, &quot;realDonal...
+## $ retweetCount  &lt;dbl&gt; 21473, 19779, 15069, 64363, 10082, 14185, 11294,...
+## $ isRetweet     &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,...
+## $ retweeted     &lt;lgl&gt; FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,...
+## $ longitude     &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...
+## $ latitude      &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, ...</code></pre>
+<p>Using <code>tidytext</code>, it is straightforward to unnest and tokenize the words in the body of the tweets:</p>
+<pre class="r"><code>words &lt;- trump %&gt;%
+  select(id, statusSource, retweetCount, favoriteCount, created, isRetweet,
+         text) %&gt;%
+  unnest_tokens(word, text)
+words</code></pre>
+<pre><code>## # A tibble: 57,239 x 7
+##                    id
+##                 &lt;chr&gt;
+## 1  830195857530183684
+## 2  830195857530183684
+## 3  830195857530183684
+## 4  830195857530183684
+## 5  830195857530183684
+## 6  830195857530183684
+## 7  830195857530183684
+## 8  830195857530183684
+## 9  830195857530183684
+## 10 830195857530183684
+## # ... with 57,229 more rows, and 6 more variables: statusSource &lt;chr&gt;,
+## #   retweetCount &lt;dbl&gt;, favoriteCount &lt;dbl&gt;, created &lt;time&gt;,
+## #   isRetweet &lt;lgl&gt;, word &lt;chr&gt;</code></pre>
+<p>Given what David Robinson found, we might want to convert the <code>statusSource</code> variable into a flag for whether it was posted via an Android device:</p>
+<pre class="r"><code>words &lt;- words %&gt;%
+  mutate(android = stringr::str_detect(statusSource, &quot;Android&quot;)) %&gt;%
+  select(- statusSource)
+words</code></pre>
+<pre><code>## # A tibble: 57,239 x 7
+##                    id retweetCount favoriteCount             created
+##                 &lt;chr&gt;        &lt;dbl&gt;         &lt;dbl&gt;              &lt;time&gt;
+## 1  830195857530183684        21473         77699 2017-02-10 23:24:51
+## 2  830195857530183684        21473         77699 2017-02-10 23:24:51
+## 3  830195857530183684        21473         77699 2017-02-10 23:24:51
+## 4  830195857530183684        21473         77699 2017-02-10 23:24:51
+## 5  830195857530183684        21473         77699 2017-02-10 23:24:51
+## 6  830195857530183684        21473         77699 2017-02-10 23:24:51
+## 7  830195857530183684        21473         77699 2017-02-10 23:24:51
+## 8  830195857530183684        21473         77699 2017-02-10 23:24:51
+## 9  830195857530183684        21473         77699 2017-02-10 23:24:51
+## 10 830195857530183684        21473         77699 2017-02-10 23:24:51
+## # ... with 57,229 more rows, and 3 more variables: isRetweet &lt;lgl&gt;,
+## #   word &lt;chr&gt;, android &lt;lgl&gt;</code></pre>
+<p>Let’s now code the tweets using the <code>afinn</code> sentiment set:</p>
+<pre class="r"><code>words &lt;- words %&gt;%
+  inner_join(get_sentiments(&quot;afinn&quot;))</code></pre>
+<pre><code>## Joining, by = &quot;word&quot;</code></pre>
+<pre class="r"><code>words</code></pre>
+<pre><code>## # A tibble: 5,093 x 8
+##                    id retweetCount favoriteCount             created
+##                 &lt;chr&gt;        &lt;dbl&gt;         &lt;dbl&gt;              &lt;time&gt;
+## 1  830047626414477312        19779         85576 2017-02-10 13:35:50
+## 2  830047626414477312        19779         85576 2017-02-10 13:35:50
+## 3  830042498806460417        15069         71312 2017-02-10 13:15:27
+## 4  829721019720015872        10082         64348 2017-02-09 15:58:01
+## 5  829721019720015872        10082         64348 2017-02-09 15:58:01
+## 6  829689436279603206        14185         84125 2017-02-09 13:52:31
+## 7  829689436279603206        14185         84125 2017-02-09 13:52:31
+## 8  829689436279603206        14185         84125 2017-02-09 13:52:31
+## 9  829689436279603206        14185         84125 2017-02-09 13:52:31
+## 10 829689436279603206        14185         84125 2017-02-09 13:52:31
+## # ... with 5,083 more rows, and 4 more variables: isRetweet &lt;lgl&gt;,
+## #   word &lt;chr&gt;, android &lt;lgl&gt;, score &lt;int&gt;</code></pre>
+<p>And now let’s see how the typical sentiment of those tweets has varied since April 2016 (midsts of the Republican primary) to present:</p>
+<pre class="r"><code>words %&gt;%
+  filter(isRetweet == FALSE) %&gt;%
+  group_by(id, created) %&gt;%
+  summarize(sentiment = mean(score)) %&gt;%
+  ggplot(aes(x = created, y = sentiment)) + 
+  geom_smooth() + 
+  geom_vline(xintercept = as.numeric(as.POSIXct((&quot;2017-01-20&quot;)))) + 
+  geom_vline(xintercept = as.numeric(as.POSIXct((&quot;2016-11-08&quot;)))) + 
+  geom_vline(xintercept = as.numeric(as.POSIXct((&quot;2016-05-03&quot;)))) + 
+  labs(x = &quot;Date&quot;, y = &quot;Mean Afinn Sentiment Score&quot;)</code></pre>
+<p><img src="../../../../img/2017-02-10/fig_1.png"></p>
+<p>The vertical lines denote the date he was named as the Republican candidate (May 3rd 2016), the date of the election (Nov 8th 2016) and inauguration day. Thing aren’t looking up for Trump. He seems to be more angry/sad/negative now than any prior point during the past year.</p>
+<p>What if we consider the grouping by using Android vs not:</p>
+<pre class="r"><code>words %&gt;%
+  filter(isRetweet == FALSE) %&gt;%
+  group_by(id, created, android) %&gt;%
+  summarize(sentiment = mean(score)) %&gt;%
+  ggplot(aes(x = created, y = sentiment, color = android)) + 
+  geom_smooth() + 
+  geom_vline(xintercept = as.numeric(as.POSIXct((&quot;2017-01-20&quot;)))) + 
+  geom_vline(xintercept = as.numeric(as.POSIXct((&quot;2016-11-08&quot;)))) + 
+  geom_vline(xintercept = as.numeric(as.POSIXct((&quot;2016-05-03&quot;)))) + 
+  labs(x = &quot;Date&quot;, y = &quot;Mean Afinn Sentiment Score&quot;)</code></pre>
+<p><img src="../../../../img/2017-02-10/fig_2.png"></p>
+<p>We see the general trend that David Robinson identified - the Android tweets tended to be more negitive than the other platforms. It is interesting that they were more positive than the tweets presumed to be by staff right before the election. Also, we can see the non-Android tweets were more positive during the transition than the Android tweets that clearly became more negitive. Perhaps the <a href="https://www.washingtonpost.com/opinions/the-9th-circuit-ruling-is-the-most-hopeful-sign-yet/2017/02/10/78a7b9ca-efba-11e6-9973-c5efb7ccfb0d_story.html?utm_term=.3a533a8e4087">limits of Presidential powers</a> are stricter than he expected. It is interesting that the Android tweets are now more negitive than positive, the first time this has occurred.</p>
+<p>Interestingly, there seems to be no effect of being positive/negitive on the number of retweets</p>
+<pre class="r"><code>words %&gt;%
+  filter(isRetweet == FALSE) %&gt;%
+  group_by(id, created, android) %&gt;%
+  summarize(sentiment = mean(score)) %&gt;%
+  inner_join(select(words, id, retweetCount, favoriteCount) %&gt;%
+               distinct()) %&gt;%
+  ggplot(aes(x = sentiment, y = retweetCount, color = android)) + 
+  geom_smooth() + 
+  geom_point() + 
+  scale_y_log10() + 
+  labs(x = &quot;Mean Afinn Sentiment Score&quot;, y = &quot;Number of Retweets&quot;)</code></pre>
+<pre><code>## Joining, by = &quot;id&quot;</code></pre>
+<p><img src="../../../../img/2017-02-10/fig_3.png"></p>
+<p>or the number of favorites</p>
+<pre class="r"><code>words %&gt;%
+  filter(isRetweet == FALSE) %&gt;%
+  group_by(id, created, android) %&gt;%
+  summarize(sentiment = mean(score)) %&gt;%
+  inner_join(select(words, id, retweetCount, favoriteCount) %&gt;%
+               distinct()) %&gt;%
+  ggplot(aes(x = sentiment, y = favoriteCount, color = android)) + 
+  geom_smooth() + 
+  geom_point() + 
+  scale_y_log10() + 
+  labs(x = &quot;Mean Afinn Sentiment Score&quot;, y = &quot;Number of Favorites&quot;)</code></pre>
+<pre><code>## Joining, by = &quot;id&quot;</code></pre>
+<p><img src="../../../../img/2017-02-10/fig_4.png"></p>
+<p>that a tweet gets.</p>
+<p>Regression analysis suggests that the number of retweets is increased significantly by a more negitive tweet but that also the effect wears off with time (very very slightly):</p>
+<pre class="r"><code>words %&gt;%
+  filter(isRetweet == FALSE, android) %&gt;%
+  group_by(id, created) %&gt;%
+  summarize(sentiment = mean(score)) %&gt;%
+  inner_join(select(words, id, retweetCount, favoriteCount) %&gt;%
+               distinct()) %&gt;%
+  lm(log(retweetCount) ~ created * (sentiment &lt; 0), data = .) %&gt;%
+  summary()</code></pre>
+<pre><code>## Joining, by = &quot;id&quot;</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = log(retweetCount) ~ created * (sentiment &lt; 0), data = .)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -1.7744 -0.3806  0.0005  0.3576  3.2661 
+## 
+## Coefficients:
+##                             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)               -1.012e+02  3.942e+00 -25.679  &lt; 2e-16 ***
+## created                    7.488e-08  2.680e-09  27.939  &lt; 2e-16 ***
+## sentiment &lt; 0TRUE          1.959e+01  6.086e+00   3.219  0.00132 ** 
+## created:sentiment &lt; 0TRUE -1.313e-08  4.135e-09  -3.175  0.00154 ** 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.5923 on 1198 degrees of freedom
+## Multiple R-squared:  0.5195, Adjusted R-squared:  0.5183 
+## F-statistic: 431.7 on 3 and 1198 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>A similar pattern exists for the number of favorites</p>
+<pre class="r"><code>words %&gt;%
+  filter(isRetweet == FALSE, android) %&gt;%
+  group_by(id, created) %&gt;%
+  summarize(sentiment = mean(score)) %&gt;%
+  inner_join(select(words, id, retweetCount, favoriteCount) %&gt;%
+               distinct()) %&gt;%
+  lm(log(favoriteCount) ~ created * (sentiment &lt; 0), data = .) %&gt;%
+  summary()</code></pre>
+<pre><code>## Joining, by = &quot;id&quot;</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = log(favoriteCount) ~ created * (sentiment &lt; 0), 
+##     data = .)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1.75782 -0.35691 -0.00795  0.33800  2.48914 
+## 
+## Coefficients:
+##                             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)               -1.176e+02  3.452e+00 -34.068  &lt; 2e-16 ***
+## created                    8.689e-08  2.347e-09  37.020  &lt; 2e-16 ***
+## sentiment &lt; 0TRUE          1.435e+01  5.329e+00   2.692  0.00721 ** 
+## created:sentiment &lt; 0TRUE -9.648e-09  3.621e-09  -2.664  0.00781 ** 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 0.5187 on 1198 degrees of freedom
+## Multiple R-squared:  0.6525, Adjusted R-squared:  0.6517 
+## F-statistic: 749.9 on 3 and 1198 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>The words used by the Android postings that were positive and negitive varied from before the election, during the transition and after Trump was sworn in:</p>
+<pre class="r"><code>words %&gt;%
+  filter(android) %&gt;%
+  mutate(phase = ifelse(as.POSIXct(&quot;2016-11-08&quot;) &gt; created, &quot;Before the election&quot;,
+                        ifelse(as.POSIXct(&quot;2017-01-20&quot;) &gt; created, &quot;Transition&quot;,
+                                          &quot;In the White House&quot;))) %&gt;%
+  group_by(phase, pos_sentiment = score &gt;= 0, word) %&gt;%
+  count() %&gt;%
+  group_by(phase, pos_sentiment) %&gt;%
+  filter(word != &quot;no&quot;) %&gt;%
+  top_n(3, wt = n) %&gt;%
+  arrange(pos_sentiment, phase, desc(n))</code></pre>
+<pre><code>## Source: local data frame [18 x 4]
+## Groups: phase, pos_sentiment [6]
+## 
+##                  phase pos_sentiment      word     n
+##                  &lt;chr&gt;         &lt;lgl&gt;     &lt;chr&gt; &lt;int&gt;
+## 1  Before the election         FALSE       bad    62
+## 2  Before the election         FALSE dishonest    27
+## 3  Before the election         FALSE    rigged    25
+## 4   In the White House         FALSE       bad    10
+## 5   In the White House         FALSE      fake    10
+## 6   In the White House         FALSE       ban     6
+## 7           Transition         FALSE       bad    13
+## 8           Transition         FALSE     wrong    11
+## 9           Transition         FALSE dishonest    10
+## 10 Before the election          TRUE     great   175
+## 11 Before the election          TRUE     thank    69
+## 12 Before the election          TRUE       big    54
+## 13  In the White House          TRUE     great     8
+## 14  In the White House          TRUE       big     5
+## 15  In the White House          TRUE       win     5
+## 16          Transition          TRUE     great    56
+## 17          Transition          TRUE       big    16
+## 18          Transition          TRUE       win    14</code></pre>
+<p>We have the fake news to thank for the <code>fake</code> debut post-being sworn in. At least the election was no longer <code>rigged</code> after he worn it.</p>
+
+
